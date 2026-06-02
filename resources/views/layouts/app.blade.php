@@ -2,60 +2,75 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name') }} — @yield('title', 'Dashboard')</title>
+    <title>{{ $title ?? config('app.name') }} - Shipment System</title>
+    <script>
+        (function() {
+            if (JSON.parse(localStorage.getItem('darkMode') ?? 'false')) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-300 font-sans antialiased" x-data>
+<body x-data="{
+    darkMode: false,
+    sidebarToggle: false,
+    init() {
+        this.darkMode = JSON.parse(localStorage.getItem('darkMode') ?? 'false');
+        this.$watch('darkMode', val => {
+            localStorage.setItem('darkMode', JSON.stringify(val));
+            document.documentElement.classList.toggle('dark', val);
+        });
+    }
+}" :class="{ 'dark bg-gray-900': darkMode }" class="bg-gray-50 dark:bg-gray-900">
+
     <div class="flex h-screen overflow-hidden">
-        @include('layouts.sidebar')
 
-        <!-- Page Heading -->
-        {{-- @if (isset($header))
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endif --}}
+        {{-- Sidebar --}}
+        @include('partials.sidebar')
 
-        {{-- Main Content --}}
-        <div class="flex-1 flex flex-col overflow-hidden">
-            {{-- Topbar --}}
-            <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                <h1 class="text-lg font-semibold text-gray-800">@yield('title', 'Dashboard')</h1>
-                <div class="flex items-center gap-3 text-sm text-gray-600">
-                    <span>{{ Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="text-red-500 hover:underline">Logout</button>
-                    </form>
-                </div>
-            </header>
+        {{-- Content Area --}}
+        <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+
+            {{-- Header --}}
+            @include('partials.navbar')
 
             {{-- Flash Messages --}}
-            @if (session('success') || session('error'))
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        @if (session('success'))
-                            flashMessage('success', '{{ session('success') }}');
-                        @endif
-                        @if (session('error'))
-                            flashMessage('error', '{{ session('error') }}');
-                        @endif
-                    });
-                </script>
+            @if (session('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+                    class="mx-6 mt-4 flex items-center gap-3 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 dark:bg-green-500/10 dark:border-green-500/20 dark:text-green-400">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {{ session('success') }}
+                </div>
             @endif
 
-            {{-- Page Content --}}
-            <main class="flex-1 overflow-y-auto p-6">
-                @yield('content')
+            @if (session('error'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+                    class="mx-6 mt-4 flex items-center gap-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            {{-- Main Content --}}
+            <main>
+                <div class="p-4 mx-auto max-w-screen-2xl md:p-6">
+                    {{ $slot }}
+                </div>
             </main>
+
         </div>
     </div>
+
 </body>
 <script>
     document.getElementById('myForm').addEventListener('submit', function(e) {
