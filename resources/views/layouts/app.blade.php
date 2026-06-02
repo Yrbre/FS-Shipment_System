@@ -17,14 +17,13 @@
 </head>
 
 <body x-data="{
-    darkMode: false,
-    sidebarToggle: false,
+    darkMode: $persist(false).as('darkMode'),
+    sidebarToggle: $persist(false).as('sidebarToggle'),
     init() {
-        this.darkMode = JSON.parse(localStorage.getItem('darkMode') ?? 'false');
         this.$watch('darkMode', val => {
-            localStorage.setItem('darkMode', JSON.stringify(val));
             document.documentElement.classList.toggle('dark', val);
         });
+        document.documentElement.classList.toggle('dark', this.darkMode);
     }
 }" :class="{ 'dark bg-gray-900': darkMode }" class="bg-gray-50 dark:bg-gray-900">
 

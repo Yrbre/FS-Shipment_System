@@ -1,5 +1,6 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import persist from '@alpinejs/persist';
 import ApexCharts from 'apexcharts';
 
 // flatpickr
@@ -15,6 +16,7 @@ window.ApexCharts = ApexCharts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
 
+Alpine.plugin(persist);
 Alpine.start();
 
 // Initialize components on DOM ready
