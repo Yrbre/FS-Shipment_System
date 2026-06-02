@@ -1,5 +1,5 @@
 {{-- resources/views/layouts/sidebar.blade.php --}}
-<aside class="w-64 bg-white border-r border-gray-200 flex flex-col" x-data="{ open: true }">
+<aside class="w-64 bg-white border-r border-gray-200 shadow-xl flex flex-col" x-data="{ open: true }">
     <div class="px-6 py-5 border-b border-gray-100">
         <span class="font-bold text-blue-600 text-lg">Shipment MS</span>
     </div>
@@ -18,9 +18,21 @@
                 <button @click="open = !open"
                     class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50">
                     <span>Master Data</span>
-                    <span x-text="open ? '▲' : '▼'" class="text-xs"></span>
+                    <span>
+                        <template x-if="open">
+                            <i class="fa-solid fa-chevron-up"></i>
+                        </template>
+
+                        <template x-if="!open">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </template>
+                    </span>
                 </button>
-                <div x-show="open" x-cloak class="ml-3 mt-1 space-y-1">
+                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+                    class="ml-3 mt-1 space-y-1">
                     @can('master.department.view')
                         <a href="{{ route('master.departments.index') }}"
                             class="block px-3 py-1.5 rounded text-gray-500 hover:bg-gray-50 {{ request()->routeIs('master.departments.*') ? 'text-blue-600 font-medium' : '' }}">Departemen</a>
@@ -50,26 +62,26 @@
             </div>
         @endcanany
 
-        @can('shipment.view')
+        {{-- @can('shipment.view')
             <a href="{{ route('shipments.index') }}"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg {{ request()->routeIs('shipments.*') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50' }}">
                 Shipment
             </a>
-        @endcan
+        @endcan --}}
 
-        @can('imc.view')
+        {{-- @can('imc.view')
             <a href="{{ route('imc.index') }}"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg {{ request()->routeIs('imc.*') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50' }}">
                 IMC Verifikasi
             </a>
-        @endcan
+        @endcan --}}
 
-        @can('tracking.view')
+        {{-- @can('tracking.view')
             <a href="{{ route('tracking.index') }}"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg {{ request()->routeIs('tracking.*') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50' }}">
                 Tracking Shipment
             </a>
-        @endcan
+        @endcan --}}
 
     </nav>
 </aside>

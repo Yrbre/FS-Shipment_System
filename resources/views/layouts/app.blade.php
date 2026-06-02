@@ -9,7 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-100 font-sans antialiased" x-data>
+<body class="bg-gray-300 font-sans antialiased" x-data>
     <div class="flex h-screen overflow-hidden">
         @include('layouts.sidebar')
 
@@ -57,5 +57,18 @@
         </div>
     </div>
 </body>
+<script>
+    document.getElementById('myForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('submitBtn');
+
+        if (btn.disabled) {
+            e.preventDefault(); // cegah submit kedua
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Loading...';
+    });
+</script>
 
 </html>
