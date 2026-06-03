@@ -16,7 +16,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-    @livewireScripts
+
 <body x-data="{
     darkMode: $persist(false).as('darkMode'),
     sidebarToggle: $persist(false).as('sidebarToggle'),
@@ -70,20 +70,27 @@
 
         </div>
     </div>
-
-</body>
+    @livewireScripts
 <script>
-    document.getElementById('myForm').addEventListener('submit', function(e) {
-        const btn = document.getElementById('submitBtn');
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('myForm');
+            if (!form) return; // ✅ Skip jika form tidak ada
 
-        if (btn.disabled) {
-            e.preventDefault(); // cegah submit kedua
-            return;
-        }
+            form.addEventListener('submit', function(e) {
+                const btn = document.getElementById('submitBtn');
+                if (!btn) return;
 
-        btn.disabled = true;
-        btn.textContent = 'Loading...';
-    });
-</script>
+                if (btn.disabled) {
+                    e.preventDefault();
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = 'Loading...';
+            });
+        });
+    </script>
+</body>
+
 
 </html>

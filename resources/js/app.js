@@ -1,23 +1,23 @@
+
 import './bootstrap';
-import Alpine from 'alpinejs';
+
 import persist from '@alpinejs/persist';
 import ApexCharts from 'apexcharts';
+import Swal from 'sweetalert2';
 
 // flatpickr
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+
 // FullCalendar
 import { Calendar } from '@fullcalendar/core';
 
-
-
-window.Alpine = Alpine;
 window.ApexCharts = ApexCharts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
+window.Swal = Swal;
 
-Alpine.plugin(persist);
-Alpine.start();
+
 
 // Initialize components on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
