@@ -14,8 +14,9 @@
         })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
-
+    @livewireScripts
 <body x-data="{
     darkMode: $persist(false).as('darkMode'),
     sidebarToggle: $persist(false).as('sidebarToggle'),
@@ -63,7 +64,7 @@
             {{-- Main Content --}}
             <main>
                 <div class="p-4 mx-auto max-w-screen-2xl md:p-6">
-                    {{ $slot }}
+                    @yield('content')
                 </div>
             </main>
 
