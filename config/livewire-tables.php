@@ -6,6 +6,7 @@ return [
      */
     'theme' => 'tailwind',
 
+
     /**
      * Filter Frontend Asset Options
      */
