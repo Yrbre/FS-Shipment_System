@@ -70,8 +70,8 @@ class StatusTable extends DataTableComponent
    public function filters(): array
     {
         return [
-            TextFilter::make('code')
-            ->filter(fn(Builder $builder, string $value)=> $builder->where('code', 'like', '%'. $value . '%'))
+            TextFilter::make('name')
+            ->filter(fn(Builder $builder, string $value)=> $builder->where('name', 'like', '%'. $value . '%'))
         ];
     }
 

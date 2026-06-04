@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreItemRequest;
-use App\Http\Requests\UpdateItemRequest;
+use App\Http\Requests\Master\StoreItemRequest;
+use App\Http\Requests\Master\UpdateItemRequest;
 use App\Services\MasterData\ItemService;
 
 
@@ -37,7 +37,6 @@ class ItemController extends Controller
 
     public function store(StoreItemRequest $request)
     {
-        dd('masuk store', auth()->user()->email, auth()->check());
         try {
             $this->itemService->create($request->validated());
             return redirect()->route('master.items.index')->with('success', 'Item created successfully.');

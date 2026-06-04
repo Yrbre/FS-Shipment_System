@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 window.confirmDelete = function (formId){
+    const isDark = document.documentElement.classList.contains('dark');
     Swal.fire({
         title: 'Anda Yakin Ingin Menghapus Data Ini?',
         text: "Data yang dihapus tidak dapat dikembalikan!",
@@ -61,7 +62,8 @@ window.confirmDelete = function (formId){
         confirmButtonColor: '#d33',
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
+        cancelButtonText: 'Batal',
+        theme: isDark ? 'dark' : 'light',
     }).then((result) => {
         if (result.isConfirmed) {
             document.getElementById(formId).submit();
@@ -70,13 +72,16 @@ window.confirmDelete = function (formId){
 }
 
 window.flashMessage = function(type, message){
+    const isDark = document.documentElement.classList.contains('dark');
     Swal.fire({
         icon: type,
         title: message,
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
+        theme: isDark ? 'dark' : 'light',
         timer: 3000,
         timerProgressBar: true,
     });
 }
+
