@@ -886,3 +886,18 @@ pre[class*="language-"] {
 .swal2-container {
     z-index: 99999 !important;
 }
+
+/* SweetAlert2 dark mode toast */
+.swal-dark-toast {
+    border: 1px solid #374151 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4) !important;
+}
+
+.swal-light-toast {
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.swal-dark-progress {
+    background: #6b7280 !important;
+}

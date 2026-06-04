@@ -71,65 +71,57 @@
         });
     </script>
 
-@if(session('success'))
+@if(session('success') || session('error') || session('warning'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        const toastConfig = {
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timerProgressBar: true,
+            background: isDark ? '#1f2937' : '#ffffff',
+            color: isDark ? '#f3f4f6' : '#111827',
+            customClass: {
+                popup: isDark ? 'swal-dark-toast' : 'swal-light-toast',
+                timerProgressBar: isDark ? 'swal-dark-progress' : '',
+            },
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        };
+
+        @if(session('success'))
         Swal.fire({
+            ...toastConfig,
             icon: 'success',
             title: 'Berhasil!',
             text: '{{ session('success') }}',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
             timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
         });
-    });
-</script>
-@endif
+        @endif
 
-@if(session('error'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('error'))
         Swal.fire({
+            ...toastConfig,
             icon: 'error',
             title: 'Gagal!',
             text: '{{ session('error') }}',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
             timer: 4000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
         });
-    });
-</script>
-@endif
+        @endif
 
-@if(session('warning'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('warning'))
         Swal.fire({
+            ...toastConfig,
             icon: 'warning',
             title: 'Perhatian!',
             text: '{{ session('warning') }}',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
             timer: 4000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
         });
+        @endif
     });
 </script>
 @endif
