@@ -9,5 +9,4 @@
            <i class="fas fa-plus"></i> Tambah Item</a>
         @endcan
     </div>
-<livewire:tables.item-table />
 @endsection

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Department')
+@section('menu-active', 'active')
+@section('active-departments', 'active')
 @section('content')
 <div class="">
     <div class="flex items-center justify-between p-4 border-b dark:border-gray-700 mb-4">
@@ -9,8 +11,5 @@
            <i class="fas fa-plus"></i> Tambah Department</a>
         @endcan
     </div>
-
-        <livewire:tables.department-table />
-
 </div>
 @endsection
