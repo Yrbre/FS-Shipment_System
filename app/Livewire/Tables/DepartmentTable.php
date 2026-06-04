@@ -27,7 +27,7 @@ class DepartmentTable extends DataTableComponent
         ->setSearchEnabled()
         ->setEmptyMessage('Tidak ada data department yang ditemukan.')
         ->setThAttributes(fn(Column $column)=>[
-            'class'=> 'px-4 py-3 text-left text-xs font-medium uppercase tracking-wider dark:text-gray-500   bg-gray-50 dark:bg-gray-800',
+            'class'=> 'px-4 py-3 text-left text-xs font-medium uppercase tracking-wider dark:text-gray-500 bg-gray-50 dark:bg-gray-800',
         ])
         ->setTdAttributes(fn(Column $column, $row, $columnIndex, $rowIndex) => [
                 'class' => 'px-4 py-3 text-sm text-gray-700',
@@ -89,12 +89,12 @@ class DepartmentTable extends DataTableComponent
         ];
     }
 
-    public function bulkActions():array
-    {
-        return [
-            'exportExcel' => 'Export Excel',
-        ];
-    }
+   public function bulkActions(): array
+{
+    return [
+        'exportExcel' => 'Export to Excel',
+    ];
+}
 
     public function exportExcel(): BinaryFileResponse
     {

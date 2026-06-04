@@ -14,6 +14,14 @@ class UpdateDepartmentRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'code' => strtoupper(trim($this->code)),
+            'name' => trim($this->name),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -21,9 +29,10 @@ class UpdateDepartmentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->route('department');
         return [
             'name' => 'sometimes|string|max:255',
-            'code' => 'sometimes|string|max:50|unique:departments,code,' . $this->route('id'),
+            'code' => 'sometimes|string|max:50|unique:departments,code,' . $id,
         ];
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ImcVerifController;
 use App\Http\Controllers\Master\DepartmentController;
 use App\Http\Controllers\Master\ItemController;
 use App\Http\Controllers\Master\StatusController;
@@ -7,6 +8,8 @@ use App\Http\Controllers\Master\SupplierController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Master\WarehouseController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +40,13 @@ Route::middleware(['auth', 'verified'])->prefix('master')->name('master.')->grou
     Route::resource('statuses', StatusController::class);
     Route::resource('users', UserController::class);
 });
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/shipments', [ShipmentController::class, 'index'])->name('shipments.index');
+    Route::get('/imc', [ImcVerifController::class, 'index'])->name('imc.index');
+    Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking.index');
+});
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

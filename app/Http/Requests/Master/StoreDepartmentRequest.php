@@ -14,6 +14,14 @@ class StoreDepartmentRequest extends FormRequest
         return true;
     }
 
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'code' => strtoupper(trim($this->code)),
+            'name' => trim($this->name),
+        ]);
+    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -21,9 +29,10 @@ class StoreDepartmentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->route('department');
         return [
+            'code' => 'required|string|max:10|unique:departments,code'. $id,
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:departments,code',
         ];
     }
 }

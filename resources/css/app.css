@@ -882,3 +882,7 @@ pre[class*="language-"] {
         margin-right: -60px !important;
     }
 }
+
+.swal2-container {
+    z-index: 99999 !important;
+}

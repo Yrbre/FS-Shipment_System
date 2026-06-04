@@ -1,6 +1,6 @@
 
 import './bootstrap';
-
+import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
@@ -16,7 +16,6 @@ window.ApexCharts = ApexCharts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
 window.Swal = Swal;
-
 
 
 // Initialize components on DOM ready
