@@ -13,16 +13,13 @@
 
 <body>
     <div id="app">
-@include('layouts.sidebar')
+        @include('layouts.sidebar')
         @include('layouts.navbar')
-            <div id="main-content">
-
-                @yield('content')
-                </div>
-            </div>
+        <div id="main-content">
+            @yield('content')
         </div>
     </div>
-@include('layouts.script')
+    @include('layouts.script')
 </body>
 
 </html>
