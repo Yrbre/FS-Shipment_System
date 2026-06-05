@@ -31,3 +31,17 @@
 <script src='{{ asset('design/dark/js/responsive.bootstrap4.min.js') }}'></script>
 <script src="{{ asset('design/dark/js/apps.js') }}"></script>
 <script src="{{ asset('design/dark/sweetalert2/dist/sweetalert2.min.js') }}"></script>
+
+
+<script>
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('.uppercase')) {
+            let start = e.target.selectionStart;
+            let end = e.target.selectionEnd;
+
+            e.target.value = e.target.value.toUpperCase();
+
+            e.target.setSelectionRange(start, end);
+        }
+    });
+</script>

@@ -31,8 +31,8 @@ class UpdateDepartmentRequest extends FormRequest
     {
         $id = $this->route('department');
         return [
-            'name' => 'sometimes|string|max:255',
-            'code' => 'sometimes|string|max:50|unique:departments,code,' . $id,
+            'code' => 'sometimes|string|max:10|unique:departments,code,' . $id,
+            'name' => 'sometimes|string|max:30',
         ];
     }
 }

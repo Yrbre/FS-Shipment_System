@@ -32,7 +32,7 @@ class StoreDepartmentRequest extends FormRequest
         $id = $this->route('department');
         return [
             'code' => 'required|string|max:10|unique:departments,code'. $id,
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:30',
         ];
     }
 }
