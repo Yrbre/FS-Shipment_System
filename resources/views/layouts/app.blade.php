@@ -1,25 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shipment Management</title>
-
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="{{ asset('design/dark/assets/images/LogoTifico.png') }}">
+    <title></title>
+    <!--CSS -->
     @include('layouts.style')
+    @stack('style')
 </head>
 
-<body>
-    <div id="app">
-        @include('layouts.sidebar')
+<body class="horizontal dark  ">
+    <div class="wrapper">
         @include('layouts.navbar')
-        <div id="main-content">
-            @yield('content')
-        </div>
-    </div>
+        <main role="main" class="main-content">
+            <div class="container-fluid">
+                @yield('content')
+            </div> <!-- .container-fluid -->
+        </main> <!-- main -->
+    </div> <!-- .wrapper -->
     @include('layouts.script')
+    <script>
+        @if (session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                theme: 'dark',
+                text: '{{ session('success') }}',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        @endif
+    </script>
+    <script>
+        @if (session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                theme: 'dark',
+                text: '{{ session('error') }}',
+                showConfirmButton: true,
+            });
+        @endif
+    </script>
+    @stack('scripts')
 </body>
 
 </html>
