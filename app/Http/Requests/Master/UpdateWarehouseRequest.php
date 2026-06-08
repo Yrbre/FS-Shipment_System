@@ -4,7 +4,7 @@ namespace App\Http\Requests\Master;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreSupplierRequest extends FormRequest
+class UpdateWarehouseRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,13 +14,14 @@ class StoreSupplierRequest extends FormRequest
         return true;
     }
 
+
     protected function prepareForValidation(): void
     {
         $this->merge([
+            'code' => strtoupper(trim($this->code)),
             'name' => trim($this->name),
         ]);
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -29,7 +30,8 @@ class StoreSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:150'
+                'code' => 'required|string|max:100|unique:warehouses,code,' . $this->route('warehouse')->id,
+                'name' => 'required|string|max:255',
         ];
     }
 }

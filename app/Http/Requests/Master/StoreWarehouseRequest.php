@@ -4,7 +4,7 @@ namespace App\Http\Requests\Master;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreSupplierRequest extends FormRequest
+class StoreWarehouseRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,6 +17,7 @@ class StoreSupplierRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
+            'code' => strtoupper(trim($this->code)),
             'name' => trim($this->name),
         ]);
     }
@@ -29,7 +30,8 @@ class StoreSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:150'
+            'code' => 'required|string|unique:warehouses,code|max:100',
+            'name' => 'required|string|max:255',
         ];
     }
 }

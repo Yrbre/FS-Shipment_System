@@ -14,6 +14,13 @@ class UpdateSupplierRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'name' => trim($this->name),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
