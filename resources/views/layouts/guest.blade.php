@@ -12,16 +12,43 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+<style>
+.typing-loop {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid white;
+    width: 0;
+    animation:
+        typing 3s steps(20) infinite alternate,
+        blink .6s infinite;
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 18ch;
+    }
+}
+
+@keyframes blink {
+    50% {
+        border-color: transparent;
+    }
+}
+</style>
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="font-sans text-gray-900 antialiased">
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-        <div>
+        <div class="flex flex-col items-center">
             <a href="/">
                 <img src="{{ asset('design/dark/assets/images/LogoTifico.png') }}" alt="Shipment Management">
             </a>
+            <h3 class="typing-loop mt-2 text-xl font-bold text-white">Shipment Management</h3>
         </div>
 
         <div
