@@ -25,14 +25,21 @@
     @include('layouts.script')
     <script>
         @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                theme: 'dark',
-                text: '{{ session('success') }}',
-                timer: 2000,
-                showConfirmButton: false,
-            });
+        Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            theme: 'dark',
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        }).fire({
+            icon: "success",
+            title: '{{ session('success') }}'
+        });
         @endif
     </script>
     <script>
