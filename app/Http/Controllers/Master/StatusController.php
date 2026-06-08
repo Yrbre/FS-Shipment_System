@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\StoreStatusRequest;
 use App\Http\Requests\Master\UpdateStatusRequest;
 use App\Services\MasterData\StatusService;
+use Illuminate\Http\Request;
 
 class StatusController extends Controller
 {
@@ -19,11 +20,33 @@ class StatusController extends Controller
         $this->middleware('permission:master.status.delete')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try{
-            $statuses = $this->statusService->getAll();
-            return view('master.status.index', compact('statuses'));
+            if($request->ajax()){
+                $statuses = $this->statusService->getAll();
+                return datatables()->of($statuses)
+                    ->addIndexColumn()
+                    ->addColumn('created_at', function($row){
+                        return \Carbon\Carbon::parse($row->created_at)->format('d-M-Y');
+                    })
+                    ->addColumn('action', function($row){
+                        return '
+                            <a href="' . route('master.statuses.edit', $row->id) . '"
+                            class="btn btn-sm btn-warning">Edit</a>
+
+                            <button class="btn btn-sm btn-danger js-delete"
+                            data-name="' . $row->name . '"
+                            data-code="' . $row->code . '"
+                            data-url="' . route('master.statuses.destroy', $row->id) . '">
+                            Hapus
+                            </button>
+                        ';
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+            }
+            return view('master.status.index');
         }catch(\Exception $e){
             return redirect()->back()->with('error','Gagal Memuat Data: ' . $e->getMessage());
         }
@@ -55,15 +78,15 @@ class StatusController extends Controller
         }
     }
 
-    public function update(UpdateStatusRequest $request, int $id)
-    {
-        try{
-            $this->statusService->update($id, $request->validated());
-            return redirect()->route('master.statuses.index')->with('success', 'Status berhasil diperbarui.');
-        }catch(\Exception $e){
-            return redirect()->back()->with('error','Gagal Memperbarui Data: ' . $e->getMessage());
+        public function update(UpdateStatusRequest $request, int $id)
+        {
+            try{
+                $this->statusService->update($id, $request->validated());
+                return redirect()->route('master.statuses.index')->with('success', 'Status berhasil diperbarui.');
+            }catch(\Exception $e){
+                return redirect()->back()->with('error','Gagal Memperbarui Data: ' . $e->getMessage());
+            }
         }
-    }
 
     public function destroy(int $id)
     {

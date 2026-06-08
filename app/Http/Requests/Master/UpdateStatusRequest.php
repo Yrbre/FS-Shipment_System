@@ -28,7 +28,7 @@ class UpdateStatusRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id = $this->route('status')->id;
+        $id = $this->route('status');
         return [
             'name' => 'sometimes|string|max:30|unique:statuses,name,' . $id,
         ];

@@ -85,6 +85,7 @@
                 // 1. Inisialisasi Select2 dulu
                 $('.select2').select2({
                     theme: 'bootstrap4',
+                    dropdownParent: $('#myForm')
                 });
 
                 // 2. Baru daftarkan event listener

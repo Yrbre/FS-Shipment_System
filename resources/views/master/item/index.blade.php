@@ -4,7 +4,7 @@
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-start">
-                <h2 class="page-title"> <i class="fa-solid fa-building" style="color:#3753ce "></i> Item Master</h2>
+                <h2 class="page-title"> <i class="fa-solid fa-list" style="color:#3753ce "></i> Item Master</h2>
                 @can('master.item.create')
                     <a href="{{ route('master.items.create') }}" class="btn btn-primary">Add Item</a>
                 @endcan
