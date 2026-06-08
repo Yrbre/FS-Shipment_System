@@ -53,8 +53,6 @@ class DepartmentController extends Controller
             }
 
             return view('master.department.index');
-            // $departments = $this->departmentService->getAll();
-            // return view('master.department.index', compact('departments'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal Memuat Data Departemen: ' . $e->getMessage());
         }

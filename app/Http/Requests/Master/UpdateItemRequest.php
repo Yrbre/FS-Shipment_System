@@ -20,6 +20,7 @@ class UpdateItemRequest extends FormRequest
             'code' => strtoupper(trim($this->code)),
             'name' => trim($this->name),
             'uom' => trim($this->uom),
+            'other_uom' => trim($this->other_uom),
             'description' => trim($this->description),
         ]);
     }
@@ -36,6 +37,7 @@ class UpdateItemRequest extends FormRequest
             'code'          => 'sometimes|string|max:255|unique:items,code,' . $id,
             'name'          => 'sometimes|string|max:255',
             'uom'           => 'sometimes|string|max:255',
+            'other_uom'     => 'required_if:uom,other|string|max:255',
             'description'   => 'nullable|string',
         ];
     }

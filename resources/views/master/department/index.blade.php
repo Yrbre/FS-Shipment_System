@@ -24,31 +24,7 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {{-- @foreach ($departments as $item)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $item->code}}</td>
-                                            <td>{{ $item->name }}</td>
-                                            <td>{{ $item->created_at->format('d-m-Y H:i') }}</td>
-                                            <td>
-                                                <button class="btn btn-sm dropdown-toggle" type="button"
-                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <span class="text-muted sr-only">Action</span>
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-right">
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('master.departments.edit', $item->id) }}">Edit</a>
-                                                    <a class="dropdown-item js-delete" data-id="{{ $item->id }}"
-                                                        data-name="{{ $item->name }}"
-                                                        data-code="{{ $item->code }}"
-                                                        data-url={{ route('master.departments.destroy', $item->id) }}
-                                                        href="#">Delete</a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach --}}
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                             <form id="deleteForm" method="POST" style="display: none;">
                                 @csrf
@@ -62,7 +38,6 @@
     </div> <!-- .row -->
     {{-- DataTableScript --}}
     @push('scripts')
-{{-- Modal Delete --}}
     <script>
         // Handle delete modal
         $(document).on('click', '.js-delete', function(e) {

@@ -20,6 +20,7 @@ class StoreItemRequest extends FormRequest
             'code' => strtoupper(trim($this->code)),
             'name' => trim($this->name),
             'uom' => trim($this->uom),
+            'other_uom' => trim($this->other_uom),
             'description' => trim($this->description),
         ]);
     }
@@ -35,6 +36,7 @@ class StoreItemRequest extends FormRequest
             'code'          => 'required|string|max:255|unique:items,code',
             'name'          => 'required|string|max:255',
             'uom'           => 'required|string|max:255',
+            'other_uom'     => 'required_if:uom,other|string|max:255',
             'description'   => 'nullable|string',
         ];
     }
