@@ -25,7 +25,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($departments as $item)
+                                    {{-- @foreach ($departments as $item)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $item->code}}</td>
@@ -47,7 +47,7 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @endforeach --}}
                                 </tbody>
                             </table>
                             <form id="deleteForm" method="POST" style="display: none;">
@@ -101,11 +101,25 @@
         <script>
             $('#dataTable-1').DataTable({
                 autoWidth: true,
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route('master.departments.index') }}',
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'code', name: 'code' },
+                    { data: 'name', name: 'name' },
+                    { data: 'created_at', name: 'created_at' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false },
+                ],
                 lengthMenu: [
                     [16, 32, 64, -1],
                     [16, 32, 64, 'All']
                 ]
             });
         </script>
+
+
+
+
     @endpush
 @endsection

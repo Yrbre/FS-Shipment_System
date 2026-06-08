@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\StoreDepartmentRequest;
 use App\Http\Requests\Master\UpdateDepartmentRequest;
 use App\Services\MasterData\DepartmentService;
-
+use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 
 class DepartmentController extends Controller
 {
@@ -22,11 +23,38 @@ class DepartmentController extends Controller
         $this->middleware('permission:master.department.delete')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $departments = $this->departmentService->getAll();
-            return view('master.department.index', compact('departments'));
+            if ($request->ajax()) {
+                $departments = $this->departmentService->getAll();
+                return DataTables::of($departments)
+                    ->addIndexColumn()
+                    ->addColumn(
+                        'created_at',
+                        fn($row) =>
+                        \Carbon\Carbon::parse($row->created_at)->format('d-M-Y')
+                    )
+                    ->addColumn('action', function ($row) {
+                        return '
+                        <a href="' . route('master.departments.edit', $row->id) . '"
+                        class="btn btn-sm btn-warning">Edit</a>
+
+                        <button class="btn btn-sm btn-danger js-delete"
+                        data-name="' . $row->name . '"
+                        data-code="' . $row->code . '"
+                        data-url="' . route('master.departments.destroy', $row->id) . '">
+                        Hapus
+                        </button>
+                    ';
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+            }
+
+            return view('master.department.index');
+            // $departments = $this->departmentService->getAll();
+            // return view('master.department.index', compact('departments'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal Memuat Data Departemen: ' . $e->getMessage());
         }
