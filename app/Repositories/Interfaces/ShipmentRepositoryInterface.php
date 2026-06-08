@@ -4,6 +4,8 @@ namespace App\Repositories\Interfaces;
 
 interface ShipmentRepositoryInterface extends BaseRepositoryInterface
 {
+    public function quary();
+
     public function allWithRelations();
 
     public function findWithRelations(int $id);

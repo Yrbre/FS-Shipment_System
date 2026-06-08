@@ -14,6 +14,11 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
         return parent::__construct($model);
     }
 
+    public function quary()
+    {
+        return $this->model->newQuery();
+    }
+
     public function allWithRelations()
     {
         return $this->model->with(

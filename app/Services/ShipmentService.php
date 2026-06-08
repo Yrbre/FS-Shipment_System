@@ -15,6 +15,11 @@ class ShipmentService
         private ShipmentHistoryRepositoryInterface $shipmentHistoryRepository,
     ) {}
 
+    public function getQuary()
+    {
+        return $this->shipmentRepository->quary();
+    }
+
     public function getAll()
     {
         return $this->shipmentRepository->allWithRelations();
