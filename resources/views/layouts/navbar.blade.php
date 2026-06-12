@@ -15,50 +15,57 @@
                     <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
                 </li>
 
-                    <li class="nav-item dropdown">
-                        <a href="#" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="ml-lg-2">Master</span>
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
+                <li class="nav-item dropdown">
+                    <a href="#" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="ml-lg-2">Master</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
                         @can('master.department.view')
-                        <a class="nav-link pl-lg-2" href="{{ route('master.departments.index') }}"><span class="ml-1">Department</span></a>
+                            <a class="nav-link pl-lg-2" href="{{ route('master.departments.index') }}"><span
+                                    class="ml-1">Department</span></a>
                         @endcan
 
                         @can('master.item.view')
-                        <a class="nav-link pl-lg-2" href="{{ route('master.items.index') }}"><span class="ml-1">Item</span></a>
+                            <a class="nav-link pl-lg-2" href="{{ route('master.items.index') }}"><span
+                                    class="ml-1">Item</span></a>
                         @endcan
 
                         @can('master.status.view')
-                        <a class="nav-link pl-lg-2" href="{{ route('master.statuses.index') }}"><span class="ml-1">Status</span></a>
+                            <a class="nav-link pl-lg-2" href="{{ route('master.statuses.index') }}"><span
+                                    class="ml-1">Status</span></a>
                         @endcan
 
                         @can('master.supplier.view')
-                        <a class="nav-link pl-lg-2" href="{{ route('master.suppliers.index') }}"><span class="ml-1">Supplier</span></a>
+                            <a class="nav-link pl-lg-2" href="{{ route('master.suppliers.index') }}"><span
+                                    class="ml-1">Supplier</span></a>
                         @endcan
 
 
                         @can('master.user.view')
-                        <a class="nav-link pl-lg-2" href="{{ route('master.users.index') }}"><span class="ml-1">Users</span></a>
+                            <a class="nav-link pl-lg-2" href="{{ route('master.users.index') }}"><span
+                                    class="ml-1">Users</span></a>
                         @endcan
 
                         @can('master.warehouse.view')
-                        <a class="nav-link pl-lg-2" href="{{ route('master.warehouses.index') }}"><span class="ml-1">Warehouse</span></a>
+                            <a class="nav-link pl-lg-2" href="{{ route('master.warehouses.index') }}"><span
+                                    class="ml-1">Warehouse</span></a>
                         @endcan
-                        </div>
-                    </li>
+                    </div>
+                </li>
 
                 <li class="nav-item dropdown">
                     <a class="dropdown-toggle nav-link pl-lg-3" href="#" id="appsDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Transaksi </a>
-                    <ul class="dropdown-menu" aria-labelledby="appsDropdown">
-                        <li class="nav-item">
-                            <a class="nav-link pl-lg-2" href="#"><span
-                                    class="ml-1">Supply
-                                    Oil</span></a>
-                        </li>
-                        @can('admin')
+                    @can('shipment.view')
+                        <ul class="dropdown-menu" aria-labelledby="appsDropdown">
+                            <li class="nav-item">
+                                <a class="nav-link pl-lg-2" href="{{ route('shipments.index') }}"><span class="ml-1">Shipment</span></a>
+                            </li>
+                        </ul>
+                    @endcan
+                    {{-- @can('admin')
                             <li class="nav-item dropdown">
                                 <a class="dropdown-toggle nav-link pl-lg-2" href="#" id="contactDropdown"
                                     role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -70,10 +77,8 @@
                                             Oil</span></a>
                                 </ul>
                             </li>
-                        @endcan
-                    </ul>
+                        @endcan --}}
                 </li>
-
             </ul>
         </div>
         <form class="form-inline ml-md-auto d-none d-lg-flex text-muted">

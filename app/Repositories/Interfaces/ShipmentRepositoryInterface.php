@@ -8,6 +8,8 @@ interface ShipmentRepositoryInterface extends BaseRepositoryInterface
 
     public function allWithRelations();
 
+    public function getAll();
+
     public function findWithRelations(int $id);
 
     public function getByDepartment(int $departmentId);

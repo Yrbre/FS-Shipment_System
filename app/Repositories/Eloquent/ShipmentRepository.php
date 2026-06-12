@@ -34,10 +34,26 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
         )->latest()->get();
     }
 
+    public function getAll()
+    {
+        return $this->model->get();
+    }
+
     public function findWithRelations(int $id)
     {
         return $this->model
-            ->with(['supplier', 'department', 'status', 'creator', 'items.item', 'histories.changedBy', 'histories.status', 'imcVerification.warehouse'])
+            ->with([
+                'supplier',
+                'department',
+                'status',
+                'creator',
+                'items.item',
+                'histories' => fn($q) => $q->orderBy('created_at', 'desc'),
+                'histories.changedBy',
+                'histories.status',
+                'imcVerif.warehouse',
+                'histories.items',
+            ])
             ->findOrFail($id);
     }
 

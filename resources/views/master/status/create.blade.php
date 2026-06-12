@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title','New Status')
 @section('content')
     <div class="row">
         <div class="col-md-12">
@@ -44,26 +45,11 @@
             });
         </script>
 
-        {{-- Other Uom Input --}}
+
         <script>
-            $(document).ready(function() {
-                // 1. Inisialisasi Select2 dulu
                 $('.select2').select2({
                     theme: 'bootstrap4',
                 });
-
-                // 2. Baru daftarkan event listener
-                $('#simple-select3').on('select2:select', function() {
-                    if ($(this).val() === 'other') {
-                        $('#otherUomInput').show();
-                        $('#other_uom').attr('required', true);
-                    } else {
-                        $('#otherUomInput').hide();
-                        $('#other_uom').attr('required', false);
-                        $('#other_uom').val('');
-                    }
-                });
-            });
         </script>
     @endpush
 @endsection

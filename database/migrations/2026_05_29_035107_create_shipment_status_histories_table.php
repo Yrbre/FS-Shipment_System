@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->date('etd')->nullable();
             $table->date('eta')->nullable();
-            $table->foreignId('changed_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('changed_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->text('notes')->nullable();
             $table->timestamps();
         });

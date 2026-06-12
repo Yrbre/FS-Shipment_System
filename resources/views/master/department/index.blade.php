@@ -1,5 +1,7 @@
 @extends('layouts.app')
+@section('title', 'Department Master')
 @section('content')
+
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-start">

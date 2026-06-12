@@ -1,12 +1,12 @@
 @extends('layouts.app')
-@section('title', 'Item Master')
+@section('title', 'Shipment')
 @section('content')
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-start">
-                <h2 class="page-title"> <i class="fa-solid fa-list" style="color:#3753ce "></i> Item Master</h2>
-                @can('master.item.create')
-                    <a href="{{ route('master.items.create') }}" class="btn btn-primary">Add Item</a>
+                <h2 class="page-title"> <i class="fa-solid fa-plane-arrival" style="color:#3753ce "></i> Shipment</h2>
+                @can('shipment.create')
+                    <a href="{{ route('shipments.create') }}" class="btn btn-primary">Add Shipment</a>
                 @endcan
             </div>
             <div class="row my-4">
@@ -19,10 +19,14 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Kode</th>
-                                        <th>Nama</th>
-                                        <th>Uom</th>
-                                        <th>Deskripsi</th>
+                                        <th>Purchase Order</th>
+                                        <th>Supplier</th>
+                                        <th>No Invoice</th>
+                                        <th>No B/L</th>
+                                        <th>ETD</th>
+                                        <th>ETA</th>
+                                        <th>Status</th>
+                                        <th>Updated At</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -46,17 +50,17 @@
                 e.preventDefault();
                 var button = $(this);
                 var name = button.data('name');
-                var code = button.data('code');
+                var role = button.data('role');
                 var url = button.data('url');
 
                 Swal.fire({
                     title: 'Confirm Delete',
                     icon: 'warning',
                     theme: 'dark',
-                    html: '<p>Are you sure you want to delete this Item?</p>' +
+                    html: '<p>Are you sure you want to delete this User?</p>' +
                         '<div class="justify-content-center">' +
-                        '<strong>Item Name :</strong> ' + name + '<br>' +
-                        '<strong>Code :</strong> ' + code +
+                        '<strong>User Name :</strong> ' + name + '<br>' +
+                        '<strong>Role :</strong> ' + role +
                         '</div>',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, Delete',
@@ -80,7 +84,7 @@
                 autoWidth: true,
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('master.items.index') }}',
+                ajax: '{{ route('shipments.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -88,20 +92,36 @@
                         searchable: false
                     },
                     {
-                        data: 'code',
-                        name: 'code'
+                        data: 'po',
+                        name: 'po'
                     },
                     {
-                        data: 'name',
-                        name: 'name'
+                        data: 'supplier',
+                        name: 'supplier'
                     },
                     {
-                        data: 'uom',
-                        name: 'uom'
+                        data: 'no_invoice',
+                        name: 'no_invoice'
                     },
                     {
-                        data: 'description',
-                        name: 'description'
+                        data: 'no_bl',
+                        name: 'no_bl'
+                    },
+                    {
+                        data: 'etd',
+                        name: 'etd'
+                    },
+                    {
+                        data: 'eta',
+                        name: 'eta'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
+                    },
+                    {
+                        data: 'updated_at',
+                        name: 'updated_at'
                     },
                     {
                         data: 'action',

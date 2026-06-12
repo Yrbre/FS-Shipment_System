@@ -42,7 +42,9 @@ Route::middleware(['auth', 'verified'])->prefix('master')->name('master.')->grou
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/shipments', [ShipmentController::class, 'index'])->name('shipments.index');
+    Route::resource('/shipments', ShipmentController::class);
+    Route::get('/shipments/{shipment}/history/{history}', [ShipmentController::class, 'history'])
+    ->name('shipments.history');
     Route::get('/imc', [ImcVerifController::class, 'index'])->name('imc.index');
     Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking.index');
 });

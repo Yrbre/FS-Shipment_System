@@ -54,8 +54,13 @@ class ShipmentHistory extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function changer()
+    public function changedBy()
     {
         return $this->belongsTo(User::class, 'changed_by');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(ShipmentHistoryItems::class);
     }
 }

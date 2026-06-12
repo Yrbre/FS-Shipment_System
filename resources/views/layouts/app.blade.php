@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" href="{{ asset('design/dark/assets/images/LogoTifico.png') }}">
-    <title></title>
+    <title>@yield('title')</title>
     <!--CSS -->
     @include('layouts.style')
     @stack('style')

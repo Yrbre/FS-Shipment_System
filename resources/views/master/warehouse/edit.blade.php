@@ -1,27 +1,28 @@
 @extends('layouts.app')
+@section('title', 'Edit Warehouse')
 @section('content')
     <div class="row">
         <div class="col-md-12">
             <div class="card shadow mb-4">
                 <div class="card-header">
-                    <strong class="card-title">Form Edit Supplier</strong>
+                    <strong class="card-title">Form Edit Warehouse</strong>
                 </div>
                 <div class="card-body">
-                    <form method="POST" id="myForm" action="{{ route('master.suppliers.update', $supplier->id) }}">
+                    <form method="POST" id="myForm" action="{{ route('master.warehouses.update', $warehouse->id) }}">
                         @csrf
                         @method('PUT')
                         <div class="form-row">
                             <div class="form-group col-md-12">
                                 <label for="">Nama</label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                    name="name" value="{{ old('name', $supplier->name) }}">
+                                    name="name" value="{{ old('name', $warehouse->name) }}">
                                 @error('name')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="d-flex justify-content-end">
-                            <a href="{{ route('master.suppliers.index') }}" class="btn btn-danger mr-3">Cancel</a>
+                            <a href="{{ route('master.warehouses.index') }}" class="btn btn-danger mr-3">Cancel</a>
                             <button type="submit" id="submitBtn" class="btn btn-primary">Submit</button>
                         </div>
                     </form>
