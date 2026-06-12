@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreShipmentRequest;
 use App\Http\Requests\UpdateShipmentRequest;
 use App\Models\Item;
+use App\Services\HscodeDataService;
 use App\Services\MasterData\DepartmentService;
 use App\Services\MasterData\ItemService;
 use App\Services\MasterData\StatusService;
@@ -91,13 +92,13 @@ class ShipmentController extends Controller
         }
     }
 
-    public function create()
+    public function create(HscodeDataService $dataService)
     {
         try {
             $departments = $this->departmentService->getAll();
             $suppliers = $this->supplierService->getAll();
             $statuses = $this->statusService->getAll();
-            $items = $this->itemService->getAll();
+            $items =   $dataService->getAll();
             return view('pages.shipment.create', compact('suppliers', 'statuses', 'departments', 'items'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal Memuat Form Create Shipment: ' . $e->getMessage());
@@ -137,14 +138,14 @@ class ShipmentController extends Controller
         }
     }
 
-    public function edit(int $id)
+    public function edit(int $id, HscodeDataService $dataService)
     {
         try {
             $shipment = $this->shipmentService->findWithRelations($id);
             $departments = $this->departmentService->getAll();
             $suppliers = $this->supplierService->getAll();
             $statuses = $this->statusService->getAll();
-            $items = $this->itemService->getAll();
+            $items =   $dataService->getAll();
             return view('pages.shipment.edit', compact('shipment', 'suppliers', 'statuses', 'departments', 'items'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal Memuat Form Edit Shipment: ' . $e->getMessage());

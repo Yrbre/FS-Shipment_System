@@ -35,7 +35,7 @@
                         <div class="card-body py-3">
                             <p class="text-muted small text-uppercase mb-1 fw-semibold">Status</p>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="rounded-circle bg-primary d-inline-block"
+                                <span class="rounded-circle bg-primary d-inline-block mr-2"
                                     style="width:10px; height:10px; flex-shrink:0;"></span>
                                 <span class="fw-bold text-primary">{{ $shipment->status->name ?? '-' }}</span>
                             </div>
@@ -47,7 +47,7 @@
                         <div class="card-body py-3">
                             <p class="text-muted small text-uppercase mb-1 fw-semibold">Supplier</p>
                             <div class="d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-building text-secondary"></i>
+                                <i class="fa-solid fa-building text-secondary mr-2"></i>
                                 <span class="fw-bold text-white">{{ $shipment->supplier->name ?? '-' }}</span>
                             </div>
                         </div>
@@ -58,7 +58,7 @@
                         <div class="card-body py-3">
                             <p class="text-muted small text-uppercase mb-1 fw-semibold">ETD</p>
                             <div class="d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-calendar-minus text-secondary"></i>
+                                <i class="fa-solid fa-calendar-minus text-secondary mr-2"></i>
                                 <span class="fw-bold text-white">
                                     {{ $shipment->etd ? $shipment->etd->format('d M Y') : '-' }}
                                 </span>
@@ -71,7 +71,7 @@
                         <div class="card-body py-3">
                             <p class="text-muted small text-uppercase mb-1 fw-semibold">ETA</p>
                             <div class="d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-calendar-check text-secondary"></i>
+                                <i class="fa-solid fa-calendar-check text-secondary mr-2"></i>
                                 <span class="fw-bold text-white">
                                     {{ $shipment->eta ? $shipment->eta->format('d M Y') : '-' }}
                                 </span>
@@ -90,7 +90,7 @@
                     {{-- Shipment Information --}}
                     <div class="card shadow-sm mb-4">
                         <div class="card-header d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-circle-info text-primary"></i>
+                            <i class="fa-solid fa-circle-info text-primary mr-2"></i>
                             <h5 class="mb-0 text-white">Shipment Information</h5>
                         </div>
                         <div class="card-body">
@@ -135,7 +135,7 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-boxes-stacked text-primary"></i>
+                                <i class="fa-solid fa-boxes-stacked text-primary mr-2"></i>
                                 <h5 class="mb-0 text-white">Shipment Items</h5>
                             </div>
                             <span class="badge bg-info text-white">

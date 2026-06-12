@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'native_api' => [
+        'url'   => env('HSCODE_API_URL'),
+    ],
+
 ];

@@ -91,8 +91,7 @@
                                     <label for="department_id" class="form-label text-white">
                                         Department <span class="text-danger">*</span>
                                     </label>
-                                    <select
-                                        class="form-control select2-department @error('department_id') is-invalid @enderror"
+                                    <select class="form-control select2-department @error('department_id') is-invalid @enderror"
                                         id="simple-select2-department" name="department_id">
                                         <optgroup label="Select Department">
                                             <option value="" selected disabled>Select Department</option>
@@ -156,18 +155,21 @@
                             <span class="badge bg-info text-white" id="item-count-badge">1 item</span>
                         </div>
                         <div class="card-body p-0">
+
                             @if ($errors->hasAny(['item_id', 'item_id.*', 'quantity.*', 'uom.*', 'new_item_name.*']))
                                 <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom">
                                     <i class="fa-solid fa-circle-exclamation me-1"></i>
                                     Terdapat kesalahan pada item — mohon periksa kembali setiap baris.
                                 </div>
                             @endif
+
                             <div class="table-responsive">
                                 <table class="table mb-0" id="items-table">
                                     <thead class="table-dark">
                                         <tr>
                                             <th style="width:44px;" class="text-center">#</th>
                                             <th style="width:32%;">Item</th>
+                                            <th style="width:12%;">HS Code</th>
                                             <th style="width:16%;">New Item Name</th>
                                             <th style="width:9%;">Qty</th>
                                             <th style="width:13%;">UOM</th>
@@ -180,39 +182,52 @@
                                         @if (old('item_id'))
                                             {{-- Restore rows on validation fail --}}
                                             @foreach (old('item_id') as $index => $itemId)
-                                                @php $isOther = $itemId === 'other'; @endphp
-                                                <tr>
+                                                @php
+                                                    $isOther  = $itemId === 'other';
+                                                    $oldHscode = old('hscode.' . $index, '');
+                                                    $oldText   = old('item_text.' . $index, '');
+                                                @endphp
+                                                <tr
+                                                    data-selected-rf="{{ $isOther ? '' : $itemId }}"
+                                                    data-selected-text="{{ $oldText }}"
+                                                    data-selected-hscode="{{ $oldHscode }}">
                                                     <td class="text-center text-muted row-num">{{ $index + 1 }}</td>
 
-                                                    {{-- Item Select --}}
+                                                    {{-- Item Select (kosong, diisi JS via AJAX) --}}
                                                     <td>
                                                         <select
                                                             class="form-control form-control-sm select2-item @error('item_id.' . $index) is-invalid @enderror"
                                                             name="item_id[]">
-                                                            <option value="" disabled>-- Select Item --</option>
-                                                            @foreach ($items as $item)
-                                                                <option value="{{ $item->id }}"
-                                                                    data-uom="{{ $item->uom }}"
-                                                                    {{ $itemId == $item->id ? 'selected' : '' }}>
-                                                                    [{{ $item->code }}] {{ $item->name }}
-                                                                </option>
-                                                            @endforeach
-                                                            <option value="other" {{ $isOther ? 'selected' : '' }}>
-                                                                ➕ Other (New Item)
-                                                            </option>
+                                                            @if (!$isOther && $itemId)
+                                                                <option value="{{ $itemId }}" selected>{{ $oldText }}</option>
+                                                            @endif
+                                                            <option value="other" {{ $isOther ? 'selected' : '' }}>➕ Other (New Item)</option>
                                                         </select>
+                                                        {{-- Simpan text item untuk restore --}}
+                                                        <input type="hidden" name="item_text[]" value="{{ $oldText }}">
                                                         @error('item_id.' . $index)
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                                         @enderror
                                                     </td>
 
-                                                    {{-- New Item Name (visible only when "other") --}}
+                                                    {{-- HS Code --}}
+                                                    <td>
+                                                        <input type="text"
+                                                            class="form-control form-control-sm item-hscode @error('hscode.' . $index) is-invalid @enderror"
+                                                            name="hscode[]"
+                                                            value="{{ $oldHscode }}"
+                                                            placeholder="HS Code" readonly
+                                                            style="{{ $oldHscode ? '' : 'opacity:.4; background:transparent;' }}">
+                                                    </td>
+
+                                                    {{-- New Item Name --}}
                                                     <td>
                                                         <input type="text"
                                                             class="form-control form-control-sm new-item-name @error('new_item_name.' . $index) is-invalid @enderror"
                                                             name="new_item_name[]"
                                                             value="{{ old('new_item_name.' . $index) }}"
-                                                            placeholder="Item name..." {{ $isOther ? '' : 'readonly' }}
+                                                            placeholder="Item name..."
+                                                            {{ $isOther ? '' : 'readonly' }}
                                                             style="{{ $isOther ? '' : 'opacity:.4; background:transparent;' }}">
                                                         @error('new_item_name.' . $index)
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -259,21 +274,18 @@
                                             <tr>
                                                 <td class="text-center text-muted row-num">1</td>
                                                 <td>
-                                                    <select class="form-control form-control-sm select2-item"
-                                                        name="item_id[]" id="simple-select2">
-                                                        <option value="" disabled selected>-- Select Item --</option>
-                                                        @foreach ($items as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                data-uom="{{ $item->uom }}">
-                                                                [{{ $item->code }}] {{ $item->name }}
-                                                            </option>
-                                                        @endforeach
+                                                    <select class="form-control form-control-sm select2-item" name="item_id[]">
                                                         <option value="other">➕ Other (New Item)</option>
                                                     </select>
+                                                    <input type="hidden" name="item_text[]" value="">
                                                 </td>
                                                 <td>
-                                                    <input type="text"
-                                                        class="form-control form-control-sm new-item-name"
+                                                    <input type="text" class="form-control form-control-sm item-hscode"
+                                                        name="hscode[]" placeholder="HS Code" readonly
+                                                        style="opacity:.4; background:transparent;">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm new-item-name"
                                                         name="new_item_name[]" placeholder="Item name..." readonly
                                                         style="opacity:.4; background:transparent;">
                                                 </td>
@@ -329,73 +341,135 @@
 @endsection
 
 @push('scripts')
-    <script>
-        (function() {
+<script>
+(function () {
 
-            const tbody = document.getElementById('items-body');
-            const addRowBtn = document.getElementById('btn-add-row');
-            const badge = document.getElementById('item-count-badge');
+    const tbody     = document.getElementById('items-body');
+    const addRowBtn = document.getElementById('btn-add-row');
+    const badge     = document.getElementById('item-count-badge');
+    const API_URL   = 'http://vapps/hscode/api/data'; // sesuaikan URL
 
-            // ── Simpan options HTML SEBELUM Select2 di-init ───────────────
-            const firstSelect = tbody.querySelector('.select2-item');
-            const itemOptionsHTML = firstSelect ? firstSelect.innerHTML : '';
+    // ── Init Select2 AJAX ─────────────────────────────────────────
+    function initSelect2Item(el, selectedRf, selectedText) {
+        const $el = $(el);
 
-            // ── Init Select2 item (dalam tabel) ───────────────────────────
-            function initSelect2Item(el) {
-                $(el).select2({
-                    theme: 'bootstrap4',
-                    width: '100%',
-                });
+        // Jika ada nilai awal (restore old()), tambahkan dulu sebagai option
+        if (selectedRf && selectedRf !== 'other') {
+            if ($el.find('option[value="' + selectedRf + '"]').length === 0) {
+                $el.prepend(new Option(selectedText, selectedRf, true, true));
             }
+        }
 
-            // ── Handle "Other" toggle ─────────────────────────────────────
-            function bindOtherToggle(row) {
-                const sel = row.querySelector('.select2-item');
-                const nameInput = row.querySelector('.new-item-name');
-                const uomInput = row.querySelector('.item-uom');
+        $el.select2({
+            theme: 'bootstrap4',
+            width: '100%',
+            placeholder: '-- Ketik untuk mencari item --',
+            allowClear: true,
+            minimumInputLength: 1,
+            ajax: {
+                url: API_URL,
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return { search: params.term, limit: 20 };
+                },
+                processResults: function (response) {
+                    if (response.status !== 'success') return { results: [] };
 
-                $(sel).on('change', function(e, isInit) { // ← tambah param isInit
-                    const val = $(this).val();
-                    if (val === 'other') {
-                        nameInput.readOnly = false;
-                        nameInput.style.opacity = '1';
-                        nameInput.style.background = '';
+                    const results = response.data.map(function (item) {
+                        return {
+                            id:     item.rf,
+                            text:   '[' + item.rf + '] ' + item.item,
+                            hscode: item.hscode,
+                        };
+                    });
 
-                        // Hanya kosongkan UOM jika bukan saat init (restore old)
-                        if (!isInit) {
-                            uomInput.value = '';
-                        }
+                    // Selalu tambahkan opsi "Other" di akhir
+                    results.push({ id: 'other', text: '➕ Other (New Item)', hscode: '' });
 
-                        uomInput.readOnly = false;
-                        setTimeout(() => nameInput.focus(), 50);
-                    } else {
-                        nameInput.readOnly = true;
-                        nameInput.style.opacity = '.4';
-                        nameInput.style.background = 'transparent';
-                        nameInput.value = '';
-                        const uom = $(this).find(':selected').data('uom') || '';
-                        uomInput.value = uom;
-                        uomInput.readOnly = !!uom;
-                    }
-                });
+                    return { results: results };
+                },
+                cache: true,
+            },
+        });
+    }
+
+    // ── Handle pilihan item ───────────────────────────────────────
+    function bindOtherToggle(row) {
+        const sel       = row.querySelector('.select2-item');
+        const nameInput = row.querySelector('.new-item-name');
+        const uomInput  = row.querySelector('.item-uom');
+        const hsInput   = row.querySelector('.item-hscode');
+        const textInput = row.querySelector('input[name="item_text[]"]');
+
+        $(sel).on('select2:select', function (e) {
+            const data = e.params.data;
+
+            if (data.id === 'other') {
+                // Other dipilih
+                nameInput.readOnly         = false;
+                nameInput.style.opacity    = '1';
+                nameInput.style.background = '';
+                uomInput.value             = '';
+                uomInput.readOnly          = false;
+                if (hsInput) {
+                    hsInput.value            = '';
+                    hsInput.style.opacity    = '.4';
+                    hsInput.style.background = 'transparent';
+                }
+                if (textInput) textInput.value = '';
+                setTimeout(() => nameInput.focus(), 50);
+
+            } else {
+                // Item dari API dipilih
+                nameInput.readOnly         = true;
+                nameInput.style.opacity    = '.4';
+                nameInput.style.background = 'transparent';
+                nameInput.value            = '';
+                uomInput.readOnly          = false;
+
+                if (hsInput) {
+                    hsInput.value            = data.hscode || '';
+                    hsInput.style.opacity    = data.hscode ? '1' : '.4';
+                    hsInput.style.background = data.hscode ? '' : 'transparent';
+                }
+
+                // Simpan text untuk keperluan restore old()
+                if (textInput) textInput.value = data.text;
             }
+        });
 
-            // ── Build row baru ────────────────────────────────────────────
-            function buildRow(num) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+        $(sel).on('select2:clear', function () {
+            nameInput.readOnly         = true;
+            nameInput.style.opacity    = '.4';
+            nameInput.style.background = 'transparent';
+            nameInput.value            = '';
+            if (hsInput) {
+                hsInput.value            = '';
+                hsInput.style.opacity    = '.4';
+                hsInput.style.background = 'transparent';
+            }
+            if (textInput) textInput.value = '';
+        });
+    }
+
+    // ── Build row baru ────────────────────────────────────────────
+    function buildRow(num) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
             <td class="text-center text-muted row-num">${num}</td>
             <td>
-                <select class="form-control form-control-sm select2-item" name="item_id[]">
-                    ${itemOptionsHTML}
-                </select>
+                <select class="form-control form-control-sm select2-item" name="item_id[]"></select>
+                <input type="hidden" name="item_text[]" value="">
             </td>
             <td>
-                <input type="text"
-                    class="form-control form-control-sm new-item-name"
-                    name="new_item_name[]"
-                    placeholder="Item name..."
-                    readonly
+                <input type="text" class="form-control form-control-sm item-hscode"
+                    name="hscode[]" placeholder="HS Code" readonly
+                    style="opacity:.4; background:transparent;">
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm new-item-name"
+                    name="new_item_name[]" placeholder="Item name..." readonly
                     style="opacity:.4; background:transparent;">
             </td>
             <td>
@@ -416,77 +490,68 @@
                 </button>
             </td>
         `;
-                return tr;
-            }
+        return tr;
+    }
 
-            // ── Renumber + badge ──────────────────────────────────────────
-            function refresh() {
-                const rows = tbody.querySelectorAll('tr');
-                rows.forEach((tr, i) => {
-                    const cell = tr.querySelector('.row-num');
-                    if (cell) cell.textContent = i + 1;
-                });
-                const n = rows.length;
-                badge.textContent = n + (n === 1 ? ' item' : ' items');
-            }
-
-            // ── Init semua row yang sudah ada (default + old() restored) ──
-            tbody.querySelectorAll('tr').forEach(row => {
-                const sel = row.querySelector('.select2-item');
-                if (sel) {
-                    initSelect2Item(sel);
-                    bindOtherToggle(row);
-                    $(sel).trigger('change', [true]); // ← kirim flag isInit = true
-                }
-            });
-
-            // ── Add row ───────────────────────────────────────────────────
-            addRowBtn.addEventListener('click', function() {
-                const row = buildRow(tbody.children.length + 1);
-                tbody.appendChild(row);
-                const sel = row.querySelector('.select2-item');
-                initSelect2Item(sel);
-                bindOtherToggle(sel.closest('tr'));
-                $(sel).trigger('change');
-                refresh();
-            });
-
-            // ── Delete row ────────────────────────────────────────────────
-            tbody.addEventListener('click', function(e) {
-                const btn = e.target.closest('.btn-delete-row');
-                if (!btn) return;
-                if (tbody.children.length <= 1) return;
-                const row = btn.closest('tr');
-                const sel = row.querySelector('.select2-item');
-                if (sel && $(sel).data('select2')) $(sel).select2('destroy');
-                row.remove();
-                refresh();
-            });
-
-            refresh();
-
-            // ── Init Select2 supplier & department (di luar tabel) ────────
-            $('.select2-supplier').select2({
-                theme: 'bootstrap4'
-            });
-            $('.select2-department').select2({
-                theme: 'bootstrap4'
-            });
-
-        })();
-    </script>
-
-    <script>
-        document.getElementById('myForm').addEventListener('submit', function(e) {
-            const btn = document.getElementById('submitBtn');
-
-            if (btn.disabled) {
-                e.preventDefault(); // cegah submit kedua
-                return;
-            }
-
-            btn.disabled = true;
-            btn.textContent = 'Loading...';
+    // ── Renumber + badge ──────────────────────────────────────────
+    function refresh() {
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach((tr, i) => {
+            const cell = tr.querySelector('.row-num');
+            if (cell) cell.textContent = i + 1;
         });
-    </script>
+        const n = rows.length;
+        badge.textContent = n + (n === 1 ? ' item' : ' items');
+    }
+
+    // ── Init semua row yang sudah ada ─────────────────────────────
+    tbody.querySelectorAll('tr').forEach(row => {
+        const sel        = row.querySelector('.select2-item');
+        const selectedRf = row.dataset.selectedRf    || '';
+        const selectedTx = row.dataset.selectedText  || '';
+        if (sel) {
+            initSelect2Item(sel, selectedRf, selectedTx);
+            bindOtherToggle(row);
+        }
+    });
+
+    // ── Add row ───────────────────────────────────────────────────
+    addRowBtn.addEventListener('click', function () {
+        const row = buildRow(tbody.children.length + 1);
+        tbody.appendChild(row);
+        const sel = row.querySelector('.select2-item');
+        initSelect2Item(sel, '', '');
+        bindOtherToggle(sel.closest('tr'));
+        refresh();
+    });
+
+    // ── Delete row ────────────────────────────────────────────────
+    tbody.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-delete-row');
+        if (!btn) return;
+        if (tbody.children.length <= 1) return;
+        const row = btn.closest('tr');
+        const sel = row.querySelector('.select2-item');
+        if (sel && $(sel).data('select2')) $(sel).select2('destroy');
+        row.remove();
+        refresh();
+    });
+
+    refresh();
+
+    // ── Init Select2 supplier & department ───────────────────────
+    $('.select2-supplier').select2({ theme: 'bootstrap4' });
+    $('.select2-department').select2({ theme: 'bootstrap4' });
+
+})();
+</script>
+
+<script>
+    document.getElementById('myForm').addEventListener('submit', function (e) {
+        const btn = document.getElementById('submitBtn');
+        if (btn.disabled) { e.preventDefault(); return; }
+        btn.disabled    = true;
+        btn.textContent = 'Loading...';
+    });
+</script>
 @endpush
