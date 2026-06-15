@@ -10,7 +10,6 @@
             {{-- Page Header --}}
             <div class="row align-items-center mb-4">
                 <div class="col">
-                    <h2 class="h5 page-title">Welcome!</h2>
                     <p class="text-muted small mb-0">{{ now()->translatedFormat('l, d F Y') }}</p>
                 </div>
                 @can('shipment.create')
