@@ -38,6 +38,10 @@ class RolePermissionSeeder extends Seeder
             'master.user.create',
             'master.user.edit',
             'master.user.delete',
+            'master.role.view',
+            'master.role.create',
+            'master.role.edit',
+            'master.role.delete',
 
             // Shipment
             'shipment.view',
@@ -51,6 +55,9 @@ class RolePermissionSeeder extends Seeder
 
             // Tracking
             'tracking.view',
+
+            // Master
+            'master',
         ];
 
         foreach ($permissions as $permission) {
@@ -61,25 +68,20 @@ class RolePermissionSeeder extends Seeder
         $admin = Role::firstOrCreate(['name' => 'Admin']);
         $admin->givePermissionTo(Permission::all());
 
-        // Purchasing
-        $purchasing = Role::firstOrCreate(['name' => 'Purchasing']);
-        $purchasing->givePermissionTo([
+        // Import
+        $import = Role::firstOrCreate(['name' => 'Import']);
+        $import->givePermissionTo([
             'shipment.view',
             'shipment.create',
             'shipment.edit',
-            'master.supplier.view',
-            'master.item.view',
-            'master.department.view',
-            'master.status.view',
         ]);
 
-        // IMC
-        $imc = Role::firstOrCreate(['name' => 'IMC']);
-        $imc->givePermissionTo([
-            'imc.view',
-            'imc.verify',
+        // Buyer
+        $buyer = Role::firstOrCreate(['name' => 'Buyer']);
+        $buyer->givePermissionTo([
             'shipment.view',
-            'master.warehouse.view',
+            'shipment.create',
+            'shipment.edit',
         ]);
 
         // User Department

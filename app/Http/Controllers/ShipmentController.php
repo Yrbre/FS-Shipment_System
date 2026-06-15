@@ -77,7 +77,9 @@ class ShipmentController extends Controller
                     ->addColumn('action', function ($row) {
                         $buttons = '<a href="' . route('shipments.show', $row->id) . '" class="btn btn-sm btn-info">Detail</a>';
 
-                        if (auth()->user()->can('shipment.edit')) {
+                        if (auth()->user()->can('shipment.edit') && now() < $row->etd) {
+                            $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
+                        }elseif(auth()->user()->roles->pluck('name')->contains('Admin')) {
                             $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
                         }
 

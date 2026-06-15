@@ -13,15 +13,18 @@
             </div>
             <div class="d-flex">
                 <div class="mr-2">
+                    <a href="{{ route('shipments.show', $shipment->id) }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left mr-1"></i> Kembali
+                </a>
+
+                </div>
+                @if(now() < $shipment->etd)
                     @can('shipment.edit')
                         <a href="{{ route('shipments.edit', $shipment->id) }}" class="btn btn-primary btn-sm">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </a>
                     @endcan
-                </div>
-                <a href="{{ route('shipments.show', $shipment->id) }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-arrow-left mr-1"></i> Kembali
-                </a>
+                    @endif
             </div>
         </div>
 
@@ -220,20 +223,6 @@
                                     <div id="hist-{{ $history->id }}" class="collapse">
                                         <div class="card-body pt-2 pb-3 px-3">
 
-                                            {{-- @if (!$prev)
-                                                <div class="alert alert-light border py-1 px-3 mb-3"
-                                                    style="font-size:0.8rem;">
-                                                    <i class="fas fa-info-circle mr-1 text-muted"></i>
-                                                    Data awal — tidak ada perbandingan sebelumnya.
-                                                </div>
-                                            @else
-                                                <div class="mb-3">
-                                                    <small class="text-muted">
-                                                        <span class="badge badge-warning">contoh</span>
-                                                        = nilai berubah dari versi sebelumnya
-                                                    </small>
-                                                </div>
-                                            @endif --}}
 
                                             {{-- Info Snapshot --}}
                                             <div class="row mb-3">

@@ -20,11 +20,13 @@
                     </a>
                     </div>
                     {{-- Tampilkan edit hanya jika status masih awal --}}
+                    @if (now() < $shipment->etd)
                     @can('shipment.edit')
                         <a href="{{ route('shipments.edit', $shipment->id) }}" class="btn btn-sm btn-primary">
                             <i class="fa-solid fa-pen-to-square me-1"></i> Update Shipment
                         </a>
                     @endcan
+                    @endif
                 </div>
             </div>
 
