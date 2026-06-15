@@ -459,7 +459,7 @@
                 </small>
                 <div class="d-flex gap-2">
                     <a href="{{ route('shipments.show', $shipment->id) }}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
                         <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
                     </button>
                 </div>
@@ -471,6 +471,20 @@
 @endsection
 
 @push('scripts')
+
+<script>
+        document.getElementById('shipment-form').addEventListener('submit', function(e) {
+            const btn = document.getElementById('submitBtn');
+
+            if (btn.disabled) {
+                e.preventDefault(); // cegah submit kedua
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+        });
+    </script>
 <script>
 (function () {
 
