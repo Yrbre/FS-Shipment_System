@@ -77,9 +77,22 @@
                                                     {{ $supplier->name }}
                                                 </option>
                                             @endforeach
+                                            <option value="other" {{ old('supplier_id') === 'other' ? 'selected' : '' }}>
+                                                ➕ Other (New Supplier)
+                                            </option>
                                         </optgroup>
                                     </select>
                                     @error('supplier_id')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+
+                                    {{-- Input supplier baru, muncul saat pilih Other --}}
+                                    <input type="text"
+                                        class="form-control mt-2 @error('new_supplier_name') is-invalid @enderror"
+                                        id="new_supplier_name" name="new_supplier_name"
+                                        value="{{ old('new_supplier_name') }}" placeholder="Nama supplier baru..."
+                                        {{ old('supplier_id') === 'other' ? '' : 'style=display:none' }}>
+                                    @error('new_supplier_name')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -335,133 +348,116 @@
 @endsection
 
 @push('scripts')
-    <script>
-        (function() {
+<script>
+(function () {
 
-            const tbody = document.getElementById('items-body');
-            const addRowBtn = document.getElementById('btn-add-row');
-            const badge = document.getElementById('item-count-badge');
-            const API_URL = 'http://vapps/hscode/api/data';
+    const tbody     = document.getElementById('items-body');
+    const addRowBtn = document.getElementById('btn-add-row');
+    const badge     = document.getElementById('item-count-badge');
+    const API_URL   = 'http://vapps/hscode/api/data';
 
-            // ── Init Select2 AJAX ─────────────────────────────────────────
-            function initSelect2Item(el, selectedRf, selectedText) {
-                const $el = $(el);
+    // ── Init Select2 AJAX item ────────────────────────────────────
+    function initSelect2Item(el, selectedRf, selectedText) {
+        const $el = $(el);
 
-                if (selectedRf && selectedRf !== 'other') {
-                    if ($el.find('option[value="' + selectedRf + '"]').length === 0) {
-                        $el.prepend(new Option(selectedText, selectedRf, true, true));
-                    }
+        if (selectedRf && selectedRf !== 'other') {
+            if ($el.find('option[value="' + selectedRf + '"]').length === 0) {
+                $el.prepend(new Option(selectedText, selectedRf, true, true));
+            }
+        }
+
+        $el.select2({
+            theme: 'bootstrap4',
+            width: '100%',
+            placeholder: '-- Ketik untuk mencari item --',
+            allowClear: true,
+            minimumInputLength: 1,
+            ajax: {
+                url: API_URL,
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return { search: params.term, limit: 20 };
+                },
+                processResults: function (response) {
+                    if (response.status !== 'success') return { results: [] };
+                    const results = response.data.map(function (d) {
+                        return {
+                            id:        d.rf,
+                            text:      '[' + d.rf + '] ' + d.item,
+                            rf:        d.rf,
+                            item_name: d.item,
+                            hscode:    d.hscode,
+                        };
+                    });
+                    results.push({ id: 'other', text: '➕ Other (New Item)', rf: '', item_name: '', hscode: '' });
+                    return { results: results };
+                },
+                cache: true,
+            },
+        });
+    }
+
+    // ── Handle pilihan item ───────────────────────────────────────
+    function bindOtherToggle(row) {
+        const sel           = row.querySelector('.select2-item');
+        const nameInput     = row.querySelector('.new-item-name');
+        const uomInput      = row.querySelector('.item-uom');
+        const hsInput       = row.querySelector('.item-hscode');
+        const rfInput       = row.querySelector('input[name="rf[]"]');
+        const itemNameInput = row.querySelector('input[name="item_name[]"]');
+
+        $(sel).on('select2:select', function (e) {
+            const data = e.params.data;
+            if (data.id === 'other') {
+                if (rfInput)       rfInput.value       = '';
+                if (itemNameInput) itemNameInput.value = '';
+                nameInput.readOnly         = false;
+                nameInput.style.opacity    = '1';
+                nameInput.style.background = '';
+                uomInput.value             = '';
+                uomInput.readOnly          = false;
+                if (hsInput) {
+                    hsInput.value            = '';
+                    hsInput.style.opacity    = '.4';
+                    hsInput.style.background = 'transparent';
                 }
-
-                $el.select2({
-                    theme: 'bootstrap4',
-                    width: '100%',
-                    placeholder: '-- Ketik untuk mencari item --',
-                    allowClear: true,
-                    minimumInputLength: 1,
-                    ajax: {
-                        url: API_URL,
-                        dataType: 'json',
-                        delay: 300,
-                        data: function(params) {
-                            return {
-                                search: params.term,
-                                limit: 20
-                            };
-                        },
-                        processResults: function(response) {
-                            if (response.status !== 'success') return {
-                                results: []
-                            };
-
-                            const results = response.data.map(function(d) {
-                                return {
-                                    id: d.rf,
-                                    text: '[' + d.rf + '] ' + d.item,
-                                    rf: d.rf,
-                                    item_name: d.item,
-                                    hscode: d.hscode,
-                                };
-                            });
-
-                            results.push({
-                                id: 'other',
-                                text: '➕ Other (New Item)',
-                                rf: '',
-                                item_name: '',
-                                hscode: ''
-                            });
-
-                            return {
-                                results: results
-                            };
-                        },
-                        cache: true,
-                    },
-                });
+                setTimeout(() => nameInput.focus(), 50);
+            } else {
+                if (rfInput)       rfInput.value       = data.rf        || '';
+                if (itemNameInput) itemNameInput.value = data.item_name || '';
+                nameInput.readOnly         = true;
+                nameInput.style.opacity    = '.4';
+                nameInput.style.background = 'transparent';
+                nameInput.value            = '';
+                uomInput.readOnly          = false;
+                if (hsInput) {
+                    hsInput.value            = data.hscode || '';
+                    hsInput.style.opacity    = data.hscode ? '1' : '.4';
+                    hsInput.style.background = data.hscode ? '' : 'transparent';
+                }
             }
+        });
 
-            // ── Handle pilihan item ───────────────────────────────────────
-            function bindOtherToggle(row) {
-                const sel = row.querySelector('.select2-item');
-                const nameInput = row.querySelector('.new-item-name');
-                const uomInput = row.querySelector('.item-uom');
-                const hsInput = row.querySelector('.item-hscode');
-                const rfInput = row.querySelector('input[name="rf[]"]');
-                const itemNameInput = row.querySelector('input[name="item_name[]"]');
-
-                $(sel).on('select2:select', function(e) {
-                    const data = e.params.data;
-
-                    if (data.id === 'other') {
-                        if (rfInput) rfInput.value = '';
-                        if (itemNameInput) itemNameInput.value = '';
-                        nameInput.readOnly = false;
-                        nameInput.style.opacity = '1';
-                        nameInput.style.background = '';
-                        uomInput.value = '';
-                        uomInput.readOnly = false;
-                        if (hsInput) {
-                            hsInput.value = '';
-                            hsInput.style.opacity = '.4';
-                            hsInput.style.background = 'transparent';
-                        }
-                        setTimeout(() => nameInput.focus(), 50);
-                    } else {
-                        if (rfInput) rfInput.value = data.rf || '';
-                        if (itemNameInput) itemNameInput.value = data.item_name || '';
-                        nameInput.readOnly = true;
-                        nameInput.style.opacity = '.4';
-                        nameInput.style.background = 'transparent';
-                        nameInput.value = '';
-                        uomInput.readOnly = false;
-                        if (hsInput) {
-                            hsInput.value = data.hscode || '';
-                            hsInput.style.opacity = data.hscode ? '1' : '.4';
-                            hsInput.style.background = data.hscode ? '' : 'transparent';
-                        }
-                    }
-                });
-
-                $(sel).on('select2:clear', function() {
-                    if (rfInput) rfInput.value = '';
-                    if (itemNameInput) itemNameInput.value = '';
-                    nameInput.readOnly = true;
-                    nameInput.style.opacity = '.4';
-                    nameInput.style.background = 'transparent';
-                    nameInput.value = '';
-                    if (hsInput) {
-                        hsInput.value = '';
-                        hsInput.style.opacity = '.4';
-                        hsInput.style.background = 'transparent';
-                    }
-                });
+        $(sel).on('select2:clear', function () {
+            if (rfInput)       rfInput.value       = '';
+            if (itemNameInput) itemNameInput.value = '';
+            nameInput.readOnly         = true;
+            nameInput.style.opacity    = '.4';
+            nameInput.style.background = 'transparent';
+            nameInput.value            = '';
+            if (hsInput) {
+                hsInput.value            = '';
+                hsInput.style.opacity    = '.4';
+                hsInput.style.background = 'transparent';
             }
+        });
+    }
 
-            // ── Build row baru ────────────────────────────────────────────
-            function buildRow(num) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+    // ── Build row baru ────────────────────────────────────────────
+    function buildRow(num) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
             <td class="text-center text-muted row-num">${num}</td>
             <td>
                 <select class="form-control form-control-sm select2-item" name="rf_select[]"></select>
@@ -496,116 +492,133 @@
                 </button>
             </td>
         `;
-                return tr;
-            }
+        return tr;
+    }
 
-            // ── Renumber + badge ──────────────────────────────────────────
-            function refresh() {
-                const rows = tbody.querySelectorAll('tr');
-                rows.forEach((tr, i) => {
-                    const cell = tr.querySelector('.row-num');
-                    if (cell) cell.textContent = i + 1;
-                });
-                const n = rows.length;
-                badge.textContent = n + (n === 1 ? ' item' : ' items');
-            }
+    // ── Renumber + badge ──────────────────────────────────────────
+    function refresh() {
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach((tr, i) => {
+            const cell = tr.querySelector('.row-num');
+            if (cell) cell.textContent = i + 1;
+        });
+        const n = rows.length;
+        badge.textContent = n + (n === 1 ? ' item' : ' items');
+    }
 
-            // ── Format tanggal YYYY-MM-DD → DD-MM-YYYY ───────────────────
-            function formatDate(val) {
-                if (!val) return '-';
-                const months = [
-                    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-                    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-                ];
-                const parts = val.split('-');
-                if (parts.length !== 3) return val;
-                const day = parts[2];
-                const month = months[parseInt(parts[1], 10) - 1] || parts[1];
-                const year = parts[0];
-                return day + ' ' + month + ' ' + year;
-            }
+    // ── Format tanggal ────────────────────────────────────────────
+    function formatDate(val) {
+        if (!val) return '-';
+        const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        const parts  = val.split('-');
+        if (parts.length !== 3) return val;
+        return parts[2] + ' ' + (months[parseInt(parts[1], 10) - 1] || parts[1]) + ' ' + parts[0];
+    }
 
-            // ── Init semua row yang sudah ada ─────────────────────────────
-            tbody.querySelectorAll('tr').forEach(row => {
-                const sel = row.querySelector('.select2-item');
-                const selectedRf = row.dataset.selectedRf || '';
-                const selectedTx = row.dataset.selectedText || '';
-                if (sel) {
-                    initSelect2Item(sel, selectedRf, selectedTx);
-                    bindOtherToggle(row);
-                }
-            });
+    // ── Init existing rows ────────────────────────────────────────
+    tbody.querySelectorAll('tr').forEach(row => {
+        const sel        = row.querySelector('.select2-item');
+        const selectedRf = row.dataset.selectedRf   || '';
+        const selectedTx = row.dataset.selectedText || '';
+        if (sel) {
+            initSelect2Item(sel, selectedRf, selectedTx);
+            bindOtherToggle(row);
+        }
+    });
 
-            // ── Add row ───────────────────────────────────────────────────
-            addRowBtn.addEventListener('click', function() {
-                const row = buildRow(tbody.children.length + 1);
-                tbody.appendChild(row);
-                const sel = row.querySelector('.select2-item');
-                initSelect2Item(sel, '', '');
-                bindOtherToggle(sel.closest('tr'));
-                refresh();
-            });
+    // ── Add row ───────────────────────────────────────────────────
+    addRowBtn.addEventListener('click', function () {
+        const row = buildRow(tbody.children.length + 1);
+        tbody.appendChild(row);
+        const sel = row.querySelector('.select2-item');
+        initSelect2Item(sel, '', '');
+        bindOtherToggle(sel.closest('tr'));
+        refresh();
+    });
 
-            // ── Delete row ────────────────────────────────────────────────
-            tbody.addEventListener('click', function(e) {
-                const btn = e.target.closest('.btn-delete-row');
-                if (!btn) return;
-                if (tbody.children.length <= 1) return;
-                const row = btn.closest('tr');
-                const sel = row.querySelector('.select2-item');
-                if (sel && $(sel).data('select2')) $(sel).select2('destroy');
-                row.remove();
-                refresh();
-            });
+    // ── Delete row ────────────────────────────────────────────────
+    tbody.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-delete-row');
+        if (!btn) return;
+        if (tbody.children.length <= 1) return;
+        const row = btn.closest('tr');
+        const sel = row.querySelector('.select2-item');
+        if (sel && $(sel).data('select2')) $(sel).select2('destroy');
+        row.remove();
+        refresh();
+    });
 
-            refresh();
+    refresh();
 
-            $('.select2-supplier').select2({
-                theme: 'bootstrap4'
-            });
-            $('.select2-department').select2({
-                theme: 'bootstrap4'
-            });
+    // ── Init Select2 Supplier ─────────────────────────────────────
+    $('.select2-supplier').select2({ theme: 'bootstrap4' });
 
-            // ── Konfirmasi Submit ─────────────────────────────────────────
-            document.getElementById('submitBtn').addEventListener('click', function() {
+    const newSupInput = document.getElementById('new_supplier_name');
 
-                // Kumpulkan data shipment
-                const po = document.getElementById('po').value.trim() || '-';
-                const no_invoice = document.getElementById('no_invoice').value.trim() || '-';
-                const no_bl = document.getElementById('no_bl').value.trim() || '-';
-                const etd = formatDate(document.getElementById('etd').value);
-                const eta = formatDate(document.getElementById('eta').value);
-                const notes = document.getElementById('notes').value.trim() || '-';
+    $('.select2-supplier').on('select2:select', function (e) {
+        const val = e.params.data.id;
+        if (val === 'other') {
+            newSupInput.style.display = '';
+            newSupInput.required      = true;
+            setTimeout(() => newSupInput.focus(), 50);
+        } else {
+            newSupInput.style.display = 'none';
+            newSupInput.required      = false;
+            newSupInput.value         = '';
+        }
+    });
 
-                const supplierEl = document.getElementById('simple-select2-supplier');
-                const supplierText = supplierEl.options[supplierEl.selectedIndex]?.text || '-';
+    // Restore jika old() = other
+    @if(old('supplier_id') === 'other')
+        newSupInput.style.display = '';
+        newSupInput.required      = true;
+    @endif
 
-                const deptEl = document.getElementById('simple-select2-department');
-                const deptText = deptEl.options[deptEl.selectedIndex]?.text || '-';
+    // ── Init Select2 Department ───────────────────────────────────
+    $('.select2-department').select2({ theme: 'bootstrap4' });
 
-                // Kumpulkan items
-                const rows = tbody.querySelectorAll('tr');
-                let itemRows = '';
-                rows.forEach(function(row, idx) {
-                    const rfInput = row.querySelector('input[name="rf[]"]');
-                    const nameHidden = row.querySelector('input[name="item_name[]"]');
-                    const nameInput = row.querySelector('.new-item-name');
-                    const hsInput = row.querySelector('.item-hscode');
-                    const qtyInput = row.querySelector('input[name="quantity[]"]');
-                    const uomInput = row.querySelector('.item-uom');
-                    const notesInput = row.querySelector('input[name="item_notes[]"]');
+    // ── Konfirmasi Submit ─────────────────────────────────────────
+    document.getElementById('submitBtn').addEventListener('click', function () {
 
-                    const rf = rfInput ? rfInput.value.trim() : '';
-                    const itemName = rf ?
-                        (nameHidden ? nameHidden.value.trim() : '') :
-                        (nameInput ? nameInput.value.trim() : '');
-                    const hs = hsInput ? (hsInput.value.trim() || '-') : '-';
-                    const qty = qtyInput ? (qtyInput.value.trim() || '-') : '-';
-                    const uom = uomInput ? (uomInput.value.trim() || '-') : '-';
-                    const itemNote = notesInput ? (notesInput.value.trim() || '-') : '-';
+        const po         = document.getElementById('po').value.trim()         || '-';
+        const no_invoice = document.getElementById('no_invoice').value.trim() || '-';
+        const no_bl      = document.getElementById('no_bl').value.trim()      || '-';
+        const etd        = formatDate(document.getElementById('etd').value);
+        const eta        = formatDate(document.getElementById('eta').value);
+        const notes      = document.getElementById('notes').value.trim()      || '-';
 
-                    itemRows += `
+        // ── Supplier — handle other ───────────────────────────────
+        const supplierEl  = document.getElementById('simple-select2-supplier');
+        const supplierVal = supplierEl.value;
+        const supplierText = supplierVal === 'other'
+            ? '➕ ' + (newSupInput.value.trim() || 'Supplier Baru')
+            : (supplierEl.options[supplierEl.selectedIndex]?.text || '-');
+
+        const deptEl   = document.getElementById('simple-select2-department');
+        const deptText = deptEl.options[deptEl.selectedIndex]?.text || '-';
+
+        // ── Kumpulkan items ───────────────────────────────────────
+        const rows = tbody.querySelectorAll('tr');
+        let itemRows = '';
+        rows.forEach(function (row, idx) {
+            const rfInput    = row.querySelector('input[name="rf[]"]');
+            const nameHidden = row.querySelector('input[name="item_name[]"]');
+            const nameInput  = row.querySelector('.new-item-name');
+            const hsInput    = row.querySelector('.item-hscode');
+            const qtyInput   = row.querySelector('input[name="quantity[]"]');
+            const uomInput   = row.querySelector('.item-uom');
+            const notesInput = row.querySelector('input[name="item_notes[]"]');
+
+            const rf       = rfInput ? rfInput.value.trim() : '';
+            const itemName = rf
+                ? (nameHidden ? nameHidden.value.trim() : '')
+                : (nameInput  ? nameInput.value.trim()  : '');
+            const hs       = hsInput    ? (hsInput.value.trim()    || '-') : '-';
+            const qty      = qtyInput   ? (qtyInput.value.trim()   || '-') : '-';
+            const uom      = uomInput   ? (uomInput.value.trim()   || '-') : '-';
+            const itemNote = notesInput ? (notesInput.value.trim() || '-') : '-';
+
+            itemRows += `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.07);">
                     <td style="padding:6px 10px; color:#aaa; vertical-align:top;">${idx + 1}</td>
                     <td style="padding:6px 10px; vertical-align:top; word-break:break-word;">${itemName || '-'}</td>
@@ -615,18 +628,17 @@
                     <td style="padding:6px 10px; vertical-align:top; word-break:break-word;">${itemNote}</td>
                 </tr>
             `;
-                });
+        });
 
-                // Tampilkan konfirmasi
-                Swal.fire({
-                    title: '<i class="fa-solid fa-paper-plane mr-2"></i> Konfirmasi Shipment',
-                    theme: 'dark',
-                    width: '90%',
-                    customClass: {
-                        popup: 'swal-shipment-popup',
-                        htmlContainer: 'swal-shipment-html',
-                    },
-                    html: `
+        Swal.fire({
+            title: '<i class="fa-solid fa-paper-plane mr-2"></i> Konfirmasi Shipment',
+            theme: 'dark',
+            width: '90%',
+            customClass: {
+                popup:         'swal-shipment-popup',
+                htmlContainer: 'swal-shipment-html',
+            },
+            html: `
                 <style>
                     .swal-shipment-popup  { max-width: 900px !important; }
                     .swal-shipment-html   { text-align: left !important; font-size: 0.875rem; }
@@ -635,45 +647,33 @@
                     .swal-info-table .lbl { color: #aaa; width: 40%; }
                     .swal-info-table .val { font-weight: 600; }
                     .swal-section-title   {
-                        font-size: 0.7rem;
-                        text-transform: uppercase;
-                        letter-spacing: 0.07em;
-                        color: #aaa;
-                        margin-bottom: 8px;
-                        padding-bottom: 4px;
+                        font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em;
+                        color: #aaa; margin-bottom: 8px; padding-bottom: 4px;
                         border-bottom: 1px solid rgba(255,255,255,0.1);
                     }
-                    .swal-item-table      { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-                    .swal-item-table th   {
-                        padding: 6px 10px;
-                        background: rgba(255,255,255,0.05);
-                        color: #ccc;
-                        text-align: left;
-                        border-bottom: 1px solid rgba(255,255,255,0.1);
+                    .swal-item-table     { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+                    .swal-item-table th  {
+                        padding: 6px 10px; background: rgba(255,255,255,0.05);
+                        color: #ccc; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);
                     }
-                    .swal-item-table td   { color: #eee; }
-
+                    .swal-item-table td  { color: #eee; }
                     @media (max-width: 576px) {
-                        .swal-shipment-popup  { width: 100% !important; margin: 0 !important; border-radius: 0 !important; }
-                        .swal-info-table .lbl { width: 45%; font-size: 0.8rem; }
-                        .swal-info-table .val { font-size: 0.8rem; }
-                        .swal-item-table      { font-size: 0.75rem; }
-                        .swal-item-table th,
-                        .swal-item-table td   { padding: 4px 6px; }
+                        .swal-shipment-popup { width: 100% !important; margin: 0 !important; border-radius: 0 !important; }
+                        .swal-info-table .lbl, .swal-info-table .val { font-size: 0.8rem; }
+                        .swal-item-table, .swal-item-table th, .swal-item-table td { font-size: 0.75rem; padding: 4px 6px; }
                     }
                 </style>
 
-                {{-- Info Shipment --}}
                 <div class="swal-section-title">Informasi Shipment</div>
-                <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px;">
-                    <div style="flex: 1 1 50%; min-width: 200px;">
+                <div style="display:flex; flex-wrap:wrap; margin-bottom:16px;">
+                    <div style="flex:1 1 50%; min-width:200px;">
                         <table class="swal-info-table">
                             <tr><td class="lbl">Purchase Order</td><td class="val">${po}</td></tr>
                             <tr><td class="lbl">No Invoice</td><td class="val">${no_invoice}</td></tr>
                             <tr><td class="lbl">No B/L</td><td class="val">${no_bl}</td></tr>
                         </table>
                     </div>
-                    <div style="flex: 1 1 50%; min-width: 200px;">
+                    <div style="flex:1 1 50%; min-width:200px;">
                         <table class="swal-info-table">
                             <tr><td class="lbl">Supplier</td><td class="val">${supplierText}</td></tr>
                             <tr><td class="lbl">Department</td><td class="val">${deptText}</td></tr>
@@ -682,50 +682,38 @@
                         </table>
                     </div>
                 </div>
-                ${notes !== '-' ? `
-                    <div class="swal-section-title">Catatan</div>
-                    <p style="color:#eee; margin-bottom:16px; font-size:0.85rem;">${notes}</p>
-                    ` : ''}
+                ${notes !== '-' ? `<div class="swal-section-title">Catatan</div><p style="color:#eee; margin-bottom:16px; font-size:0.85rem;">${notes}</p>` : ''}
 
-                {{-- Items --}}
                 <div class="swal-section-title">Items (${rows.length})</div>
-                <div style="overflow-x: auto;">
+                <div style="overflow-x:auto;">
                     <table class="swal-item-table">
                         <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Nama Item</th>
-                                <th>HS Code</th>
-                                <th>Qty</th>
-                                <th>UOM</th>
-                                <th>Catatan</th>
-                            </tr>
+                            <tr><th>#</th><th>Nama Item</th><th>HS Code</th><th>Qty</th><th>UOM</th><th>Catatan</th></tr>
                         </thead>
                         <tbody>${itemRows}</tbody>
                     </table>
                 </div>
             `,
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1"></i> Ya, Submit',
-                    cancelButtonText: 'Batal, Cek Lagi',
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#6c757d',
-                    didClose: () => {
-                        document.body.classList.remove('swal2-shown');
-                        document.body.style.overflow = '';
-                        document.body.style.paddingRight = '';
-                    }
-                }).then(function(result) {
-                    if (result.isConfirmed) {
-                        const btn = document.getElementById('submitBtn');
-                        btn.disabled = true;
-                        btn.innerHTML =
-                        '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Submitting...';
-                        document.getElementById('myForm').submit();
-                    }
-                });
-            });
+            showCancelButton:   true,
+            confirmButtonText:  '<i class="fa-solid fa-paper-plane mr-1"></i> Ya, Submit',
+            cancelButtonText:   'Batal, Cek Lagi',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor:  '#6c757d',
+            didClose: () => {
+                document.body.classList.remove('swal2-shown');
+                document.body.style.overflow    = '';
+                document.body.style.paddingRight = '';
+            }
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                const btn     = document.getElementById('submitBtn');
+                btn.disabled  = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Submitting...';
+                document.getElementById('myForm').submit();
+            }
+        });
+    });
 
-        })();
-    </script>
+})();
+</script>
 @endpush

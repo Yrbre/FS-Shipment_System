@@ -11,7 +11,6 @@ use App\Services\MasterData\ItemService;
 use App\Services\MasterData\StatusService;
 use App\Services\MasterData\SupplierService;
 use App\Services\ShipmentService;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -79,7 +78,7 @@ class ShipmentController extends Controller
 
                         if (auth()->user()->can('shipment.edit') && now() < $row->etd) {
                             $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
-                        }elseif(auth()->user()->roles->pluck('name')->contains('Admin')) {
+                        } elseif (auth()->user()->roles->pluck('name')->contains('Admin')) {
                             $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
                         }
 
@@ -121,8 +120,14 @@ class ShipmentController extends Controller
                 'notes',
             ]);
 
-            $items = $this->resolveItems($request);
+            // Jika supplier = other, firstOrCreate supplier baru
+            if ($data['supplier_id'] === 'other') {
+                $newSupplierName    = trim($request->input('new_supplier_name'));
+                $supplier           = \App\Models\Supplier::firstOrCreate(['name' => $newSupplierName]);
+                $data['supplier_id'] = $supplier->id;
+            }
 
+            $items = $this->resolveItems($request);
             $this->shipmentService->create($data, $items);
 
             return redirect()
@@ -202,65 +207,64 @@ class ShipmentController extends Controller
     }
 
     public function history(int $id)
-{
-    try {
-        $shipment = $this->shipmentService->findWithRelations($id);
+    {
+        try {
+            $shipment = $this->shipmentService->findWithRelations($id);
 
-        $historiesSorted = $shipment->histories->values();
+            $historiesSorted = $shipment->histories->values();
 
-        $historyDiffs = [];
+            $historyDiffs = [];
 
-        foreach ($historiesSorted as $idx => $history) {
-            $prev = $idx > 0 ? $historiesSorted[$idx - 1] : null;
+            foreach ($historiesSorted as $idx => $history) {
+                $prev = $idx > 0 ? $historiesSorted[$idx - 1] : null;
 
-            $shipmentFields = ['po', 'no_invoice', 'no_bl', 'supplier_id', 'status_id', 'etd', 'eta'];
-            $changedFields  = [];
+                $shipmentFields = ['po', 'no_invoice', 'no_bl', 'supplier_id', 'status_id', 'etd', 'eta'];
+                $changedFields  = [];
 
-            if ($prev) {
-                foreach ($shipmentFields as $field) {
-                    $currVal = $this->normalizeValue($field, $history->{$field} ?? '');
-                    $prevVal = $this->normalizeValue($field, $prev->{$field} ?? '');
+                if ($prev) {
+                    foreach ($shipmentFields as $field) {
+                        $currVal = $this->normalizeValue($field, $history->{$field} ?? '');
+                        $prevVal = $this->normalizeValue($field, $prev->{$field} ?? '');
 
-                    if ($currVal !== $prevVal) {
-                        $changedFields[] = $field;
+                        if ($currVal !== $prevVal) {
+                            $changedFields[] = $field;
+                        }
                     }
                 }
-            }
 
 
-            $prevItems      = $prev ? $prev->items->keyBy('item_id') : collect();
-            $currItems      = $history->items->keyBy('item_id');
-            $addedItemIds   = $currItems->keys()->diff($prevItems->keys())->toArray();
-            $removedItemIds = $prevItems->keys()->diff($currItems->keys())->toArray();
+                $prevItems      = $prev ? $prev->items->keyBy('item_id') : collect();
+                $currItems      = $history->items->keyBy('item_id');
+                $addedItemIds   = $currItems->keys()->diff($prevItems->keys())->toArray();
+                $removedItemIds = $prevItems->keys()->diff($currItems->keys())->toArray();
 
-            $changedItemFields = [];
-            foreach ($currItems as $itemId => $hItem) {
-                $prevItem = $prevItems->get($itemId);
-                if (!$prevItem || in_array($itemId, $addedItemIds)) continue;
+                $changedItemFields = [];
+                foreach ($currItems as $itemId => $hItem) {
+                    $prevItem = $prevItems->get($itemId);
+                    if (!$prevItem || in_array($itemId, $addedItemIds)) continue;
 
-                foreach (['item_id', 'hscode', 'quantity', 'uom', 'notes'] as $field) {
-                    if ((string) ($prevItem->{$field} ?? '') !== (string) ($hItem->{$field} ?? '')) {
-                        $changedItemFields[$itemId][] = $field;
+                    foreach (['item_id', 'hscode', 'quantity', 'uom', 'notes'] as $field) {
+                        if ((string) ($prevItem->{$field} ?? '') !== (string) ($hItem->{$field} ?? '')) {
+                            $changedItemFields[$itemId][] = $field;
+                        }
                     }
                 }
+
+                $historyDiffs[$history->id] = [
+                    'prev'              => $prev,
+                    'changedFields'     => $changedFields,
+                    'addedItemIds'      => $addedItemIds,
+                    'removedItemIds'    => $removedItemIds,
+                    'changedItemFields' => $changedItemFields,
+                    'prevItems'         => $prevItems,
+                ];
             }
 
-            $historyDiffs[$history->id] = [
-                'prev'              => $prev,
-                'changedFields'     => $changedFields,
-                'addedItemIds'      => $addedItemIds,
-                'removedItemIds'    => $removedItemIds,
-                'changedItemFields' => $changedItemFields,
-                'prevItems'         => $prevItems,
-            ];
+            return view('pages.shipment.viewDetailHistory', compact('shipment', 'historyDiffs'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal Memuat Detail Shipment: ' . $e->getMessage());
         }
-
-        return view('pages.shipment.viewDetailHistory', compact('shipment', 'historyDiffs'));
-
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Gagal Memuat Detail Shipment: ' . $e->getMessage());
     }
-}
 
     private function normalizeValue(string $field, $value): string
     {
