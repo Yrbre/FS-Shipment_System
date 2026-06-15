@@ -92,7 +92,6 @@
                                 @enderror
                             </div>
 
-                            {{-- Supplier --}}
                             <div class="col-md-6">
                                 <label for="supplier_id" class="form-label text-white">
                                     Supplier <span class="text-danger">*</span>
@@ -114,7 +113,6 @@
                                 @enderror
                             </div>
 
-                            {{-- Department --}}
                             <div class="col-md-6">
                                 <label for="department_id" class="form-label text-white">
                                     Department <span class="text-danger">*</span>
@@ -177,7 +175,7 @@
                 </div>
             </section>
 
-            {{-- Section 2: Update Status (hanya untuk yang punya permission) --}}
+            {{-- Section 2: Update Status --}}
             @can('shipment.edit')
             <section class="mb-4">
                 <div class="card shadow-sm border-warning" style="border-left: 3px solid #ffc107 !important;">
@@ -190,11 +188,8 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3 align-items-end">
-
                             <div class="col-md-5">
-                                <label for="status_id" class="form-label text-white">
-                                    Status Baru
-                                </label>
+                                <label for="status_id" class="form-label text-white">Status Baru</label>
                                 <select class="form-control select2-status @error('status_id') is-invalid @enderror"
                                     id="status_id" name="status_id">
                                     <optgroup label="Select Status">
@@ -211,7 +206,6 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
-
                             <div class="col-md-7">
                                 <label for="status_notes" class="form-label text-white">
                                     Catatan Perubahan Status
@@ -226,10 +220,8 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
                         </div>
 
-                        {{-- Status flow hint --}}
                         @if ($statuses->count() > 0)
                         <div class="d-flex align-items-center gap-2 mt-3 flex-wrap">
                             @foreach ($statuses as $status)
@@ -263,7 +255,7 @@
                     </div>
                     <div class="card-body p-0">
 
-                        @if ($errors->hasAny(['item_id', 'item_id.*', 'quantity.*', 'uom.*', 'new_item_name.*']))
+                        @if ($errors->hasAny(['rf.*', 'item_name.*', 'hscode.*', 'quantity.*', 'uom.*']))
                             <div class="alert alert-danger mb-0 rounded-0 border-0 border-bottom">
                                 <i class="fa-solid fa-circle-exclamation me-1"></i>
                                 Terdapat kesalahan pada item — mohon periksa kembali setiap baris.
@@ -276,6 +268,7 @@
                                     <tr>
                                         <th style="width:44px;" class="text-center">#</th>
                                         <th style="width:32%;">Item</th>
+                                        <th style="width:12%;">HS Code</th>
                                         <th style="width:16%;">New Item Name</th>
                                         <th style="width:9%;">Qty</th>
                                         <th style="width:13%;">UOM</th>
@@ -285,116 +278,164 @@
                                 </thead>
                                 <tbody id="items-body">
 
-                                    @php
-                                        // Jika ada old() (validation fail), pakai old — jika tidak, pakai data shipment
-                                        $oldItemIds = old('item_id');
-                                        $useOld     = !is_null($oldItemIds);
-                                        $rows       = $useOld
-                                            ? array_keys($oldItemIds)
-                                            : $shipment->items->keys()->toArray();
-                                    @endphp
+                                    @if (old('rf'))
+                                        {{-- Restore rows on validation fail --}}
+                                        @foreach (old('rf') as $index => $oldRf)
+                                            @php
+                                                $oldItemName = old('item_name.' . $index, '');
+                                                $oldHscode   = old('hscode.' . $index, '');
+                                                $oldNewName  = old('new_item_name.' . $index, '');
+                                                $isOther     = empty($oldRf);
+                                            @endphp
+                                            <tr
+                                                data-selected-rf="{{ $oldRf }}"
+                                                data-selected-text="{{ $oldItemName ? '[' . $oldRf . '] ' . $oldItemName : '' }}"
+                                                data-selected-hscode="{{ $oldHscode }}">
 
-                                    @foreach ($rows as $index)
-                                        @php
-                                            if ($useOld) {
-                                                $itemId       = old("item_id.{$index}");
-                                                $isOther      = $itemId === 'other';
-                                                $quantity     = old("quantity.{$index}");
-                                                $uom          = old("uom.{$index}");
-                                                $itemNote     = old("item_notes.{$index}");
-                                                $newItemName  = old("new_item_name.{$index}");
-                                                $shipmentItemId = old("shipment_item_id.{$index}");
-                                            } else {
-                                                $si           = $shipment->items[$index];
-                                                $itemId       = $si->item_id;
-                                                $isOther      = false;
-                                                $quantity     = $si->quantity + 0;
-                                                $uom          = $si->uom;
-                                                $itemNote     = $si->notes;
-                                                $newItemName  = '';
-                                                $shipmentItemId = $si->id;
-                                            }
-                                        @endphp
-                                        <tr>
-                                            {{-- Hidden: shipment_item_id untuk update/delete existing --}}
-                                            <input type="hidden" name="shipment_item_id[]" value="{{ $shipmentItemId }}">
-
-                                            <td class="text-center text-muted row-num">{{ $index + 1 }}</td>
-
-                                            {{-- Item Select --}}
-                                            <td>
-                                                <select class="form-control form-control-sm select2-item @error('item_id.'.$index) is-invalid @enderror"
-                                                    name="item_id[]">
-                                                    <option value="" disabled>-- Select Item --</option>
-                                                    @foreach ($items as $item)
-                                                        <option value="{{ $item->id }}"
-                                                            data-uom="{{ $item->uom }}"
-                                                            {{ $itemId == $item->id ? 'selected' : '' }}>
-                                                            [{{ $item->code }}] {{ $item->name }}
+                                                <td class="text-center text-muted row-num">{{ $index + 1 }}</td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2-item @error('rf.' . $index) is-invalid @enderror"
+                                                        name="rf_select[]">
+                                                        @if (!$isOther && $oldRf)
+                                                            <option value="{{ $oldRf }}" selected>
+                                                                [{{ $oldRf }}] {{ $oldItemName }}
+                                                            </option>
+                                                        @endif
+                                                        <option value="other" {{ $isOther ? 'selected' : '' }}>
+                                                            ➕ Other (New Item)
                                                         </option>
-                                                    @endforeach
-                                                    <option value="other" {{ $isOther ? 'selected' : '' }}>
-                                                        ➕ Other (New Item)
-                                                    </option>
-                                                </select>
-                                                @error('item_id.'.$index)
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </td>
+                                                    </select>
+                                                    <input type="hidden" name="rf[]"        value="{{ $oldRf }}">
+                                                    <input type="hidden" name="item_name[]" value="{{ $oldItemName }}">
+                                                    @error('rf.' . $index)
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @enderror
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm item-hscode"
+                                                        name="hscode[]"
+                                                        value="{{ $oldHscode }}"
+                                                        placeholder="HS Code" readonly
+                                                        style="{{ $oldHscode ? '' : 'opacity:.4; background:transparent;' }}">
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm new-item-name @error('new_item_name.' . $index) is-invalid @enderror"
+                                                        name="new_item_name[]"
+                                                        value="{{ $oldNewName }}"
+                                                        placeholder="Item name..."
+                                                        {{ $isOther ? '' : 'readonly' }}
+                                                        style="{{ $isOther ? '' : 'opacity:.4; background:transparent;' }}">
+                                                    @error('new_item_name.' . $index)
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @enderror
+                                                </td>
+                                                <td>
+                                                    <input type="number"
+                                                        class="form-control form-control-sm @error('quantity.' . $index) is-invalid @enderror"
+                                                        name="quantity[]"
+                                                        value="{{ old('quantity.' . $index) }}"
+                                                        placeholder="0" min="0" step="0.01">
+                                                    @error('quantity.' . $index)
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm item-uom @error('uom.' . $index) is-invalid @enderror"
+                                                        name="uom[]"
+                                                        value="{{ old('uom.' . $index) }}"
+                                                        placeholder="e.g. PCS">
+                                                    @error('uom.' . $index)
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        name="item_notes[]"
+                                                        value="{{ old('item_notes.' . $index) }}"
+                                                        placeholder="Notes...">
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-danger btn-delete-row"
+                                                        title="Remove item">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
 
-                                            {{-- New Item Name --}}
-                                            <td>
-                                                <input type="text"
-                                                    class="form-control form-control-sm new-item-name @error('new_item_name.'.$index) is-invalid @enderror"
-                                                    name="new_item_name[]"
-                                                    value="{{ $newItemName }}"
-                                                    placeholder="Item name..."
-                                                    {{ $isOther ? '' : 'readonly' }}
-                                                    style="{{ $isOther ? '' : 'opacity:.4; background:transparent;' }}">
-                                                @error('new_item_name.'.$index)
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </td>
+                                    @else
+                                        {{-- Load dari data shipment existing --}}
+                                        @foreach ($shipment->items as $si)
+                                            <tr
+                                                data-selected-rf="{{ $si->rf }}"
+                                                data-selected-text="{{ $si->rf ? '[' . $si->rf . '] ' . $si->item->name : '' }}"
+                                                data-selected-hscode="{{ $si->hscode }}">
 
-                                            <td>
-                                                <input type="number"
-                                                    class="form-control form-control-sm @error('quantity.'.$index) is-invalid @enderror"
-                                                    name="quantity[]"
-                                                    value="{{ $quantity }}"
-                                                    placeholder="0" min="0" step="0.01">
-                                                @error('quantity.'.$index)
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </td>
-
-                                            <td>
-                                                <input type="text"
-                                                    class="form-control form-control-sm item-uom @error('uom.'.$index) is-invalid @enderror"
-                                                    name="uom[]"
-                                                    value="{{ $uom }}"
-                                                    placeholder="e.g. PCS">
-                                                @error('uom.'.$index)
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </td>
-
-                                            <td>
-                                                <input type="text"
-                                                    class="form-control form-control-sm"
-                                                    name="item_notes[]"
-                                                    value="{{ $itemNote }}"
-                                                    placeholder="Notes...">
-                                            </td>
-
-                                            <td class="text-center">
-                                                <button type="button"
-                                                    class="btn btn-sm btn-outline-danger btn-delete-row"
-                                                    title="Remove item">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                                <td class="text-center text-muted row-num">{{ $loop->iteration }}</td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2-item"
+                                                        name="rf_select[]">
+                                                        @if ($si->rf)
+                                                            <option value="{{ $si->rf }}" selected>
+                                                                [{{ $si->rf }}] {{ $si->item->name ?? '' }}
+                                                            </option>
+                                                        @endif
+                                                        <option value="other">➕ Other (New Item)</option>
+                                                    </select>
+                                                    <input type="hidden" name="rf[]"        value="{{ $si->rf }}">
+                                                    <input type="hidden" name="item_name[]" value="{{ $si->item->name ?? '' }}">
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm item-hscode"
+                                                        name="hscode[]"
+                                                        value="{{ $si->hscode }}"
+                                                        placeholder="HS Code" readonly
+                                                        style="{{ $si->hscode ? '' : 'opacity:.4; background:transparent;' }}">
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm new-item-name"
+                                                        name="new_item_name[]"
+                                                        value=""
+                                                        placeholder="Item name..."
+                                                        readonly
+                                                        style="opacity:.4; background:transparent;">
+                                                </td>
+                                                <td>
+                                                    <input type="number"
+                                                        class="form-control form-control-sm"
+                                                        name="quantity[]"
+                                                        value="{{ $si->quantity + 0 }}"
+                                                        placeholder="0" min="0" step="0.01">
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm item-uom"
+                                                        name="uom[]"
+                                                        value="{{ $si->uom }}"
+                                                        placeholder="e.g. PCS">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        name="item_notes[]"
+                                                        value="{{ $si->notes }}"
+                                                        placeholder="Notes...">
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-danger btn-delete-row"
+                                                        title="Remove item">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
 
                                 </tbody>
                             </table>
@@ -416,12 +457,8 @@
                     <i class="fa-solid fa-clock me-1"></i>
                     Last updated: {{ $shipment->updated_at->format('d M Y, H:i') }}
                 </small>
-                <div class="d-flex">
-                    <div class="mr-2">
-                    <a href="{{ route('shipments.show', $shipment->id) }}" class="btn btn-secondary">
-                        Cancel
-                    </a>
-                    </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('shipments.show', $shipment->id) }}" class="btn btn-secondary">Cancel</a>
                     <button type="submit" class="btn btn-primary">
                         <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
                     </button>
@@ -440,55 +477,137 @@
     const tbody     = document.getElementById('items-body');
     const addRowBtn = document.getElementById('btn-add-row');
     const badge     = document.getElementById('item-count-badge');
+    const API_URL   = 'http://vapps/hscode/api/data';
 
-    // ── Simpan options HTML SEBELUM Select2 di-init ───────────────
-    const firstSelect     = tbody.querySelector('.select2-item');
-    const itemOptionsHTML = firstSelect ? firstSelect.innerHTML : '';
+    // ── Init Select2 AJAX ─────────────────────────────────────────
+    function initSelect2Item(el, selectedRf, selectedText) {
+        const $el = $(el);
 
-    function initSelect2Item(el) {
-        $(el).select2({ theme: 'bootstrap4', width: '100%' });
+        if (selectedRf && selectedRf !== 'other') {
+            if ($el.find('option[value="' + selectedRf + '"]').length === 0) {
+                $el.prepend(new Option(selectedText, selectedRf, true, true));
+            }
+        }
+
+        $el.select2({
+            theme: 'bootstrap4',
+            width: '100%',
+            placeholder: '-- Ketik untuk mencari item --',
+            allowClear: true,
+            minimumInputLength: 1,
+            ajax: {
+                url: API_URL,
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return { search: params.term, limit: 20 };
+                },
+                processResults: function (response) {
+                    if (response.status !== 'success') return { results: [] };
+
+                    const results = response.data.map(function (d) {
+                        return {
+                            id:        d.rf,
+                            text:      '[' + d.rf + '] ' + d.item,
+                            rf:        d.rf,
+                            item_name: d.item,
+                            hscode:    d.hscode,
+                        };
+                    });
+
+                    results.push({ id: 'other', text: '➕ Other (New Item)', rf: '', item_name: '', hscode: '' });
+
+                    return { results: results };
+                },
+                cache: true,
+            },
+        });
     }
 
+    // ── Handle pilihan item ───────────────────────────────────────
     function bindOtherToggle(row) {
-        const sel       = row.querySelector('.select2-item');
-        const nameInput = row.querySelector('.new-item-name');
-        const uomInput  = row.querySelector('.item-uom');
+        const sel           = row.querySelector('.select2-item');
+        const nameInput     = row.querySelector('.new-item-name');
+        const uomInput      = row.querySelector('.item-uom');
+        const hsInput       = row.querySelector('.item-hscode');
+        const rfInput       = row.querySelector('input[name="rf[]"]');
+        const itemNameInput = row.querySelector('input[name="item_name[]"]');
 
-        $(sel).on('change', function () {
-            const val = $(this).val();
-            if (val === 'other') {
+        $(sel).on('select2:select', function (e) {
+            const data = e.params.data;
+
+            if (data.id === 'other') {
+                if (rfInput)       rfInput.value       = '';
+                if (itemNameInput) itemNameInput.value = '';
+
                 nameInput.readOnly         = false;
                 nameInput.style.opacity    = '1';
                 nameInput.style.background = '';
-                uomInput.value    = '';
-                uomInput.readOnly = false;
+                uomInput.value             = '';
+                uomInput.readOnly          = false;
+
+                if (hsInput) {
+                    hsInput.value            = '';
+                    hsInput.style.opacity    = '.4';
+                    hsInput.style.background = 'transparent';
+                }
+
                 setTimeout(() => nameInput.focus(), 50);
+
             } else {
+                if (rfInput)       rfInput.value       = data.rf        || '';
+                if (itemNameInput) itemNameInput.value = data.item_name || '';
+
                 nameInput.readOnly         = true;
                 nameInput.style.opacity    = '.4';
                 nameInput.style.background = 'transparent';
                 nameInput.value            = '';
-                const uom = $(this).find(':selected').data('uom') || '';
-                uomInput.value    = uom;
-                uomInput.readOnly = !!uom;
+                uomInput.readOnly          = false;
+
+                if (hsInput) {
+                    hsInput.value            = data.hscode || '';
+                    hsInput.style.opacity    = data.hscode ? '1' : '.4';
+                    hsInput.style.background = data.hscode ? '' : 'transparent';
+                }
+            }
+        });
+
+        $(sel).on('select2:clear', function () {
+            if (rfInput)       rfInput.value       = '';
+            if (itemNameInput) itemNameInput.value = '';
+
+            nameInput.readOnly         = true;
+            nameInput.style.opacity    = '.4';
+            nameInput.style.background = 'transparent';
+            nameInput.value            = '';
+
+            if (hsInput) {
+                hsInput.value            = '';
+                hsInput.style.opacity    = '.4';
+                hsInput.style.background = 'transparent';
             }
         });
     }
 
+    // ── Build row baru ────────────────────────────────────────────
     function buildRow(num) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <input type="hidden" name="shipment_item_id[]" value="">
             <td class="text-center text-muted row-num">${num}</td>
             <td>
-                <select class="form-control form-control-sm select2-item" name="item_id[]">
-                    ${itemOptionsHTML}
-                </select>
+                <select class="form-control form-control-sm select2-item" name="rf_select[]"></select>
+                <input type="hidden" name="rf[]"        value="">
+                <input type="hidden" name="item_name[]" value="">
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm item-hscode"
+                    name="hscode[]" placeholder="HS Code" readonly
+                    style="opacity:.4; background:transparent;">
             </td>
             <td>
                 <input type="text" class="form-control form-control-sm new-item-name"
-                    name="new_item_name[]" placeholder="Item name..."
-                    readonly style="opacity:.4; background:transparent;">
+                    name="new_item_name[]" placeholder="Item name..." readonly
+                    style="opacity:.4; background:transparent;">
             </td>
             <td>
                 <input type="number" class="form-control form-control-sm"
@@ -511,6 +630,7 @@
         return tr;
     }
 
+    // ── Renumber + badge ──────────────────────────────────────────
     function refresh() {
         const rows = tbody.querySelectorAll('tr');
         rows.forEach((tr, i) => {
@@ -523,11 +643,12 @@
 
     // ── Init existing rows ────────────────────────────────────────
     tbody.querySelectorAll('tr').forEach(row => {
-        const sel = row.querySelector('.select2-item');
+        const sel        = row.querySelector('.select2-item');
+        const selectedRf = row.dataset.selectedRf   || '';
+        const selectedTx = row.dataset.selectedText || '';
         if (sel) {
-            initSelect2Item(sel);
+            initSelect2Item(sel, selectedRf, selectedTx);
             bindOtherToggle(row);
-            $(sel).trigger('change');
         }
     });
 
@@ -536,9 +657,8 @@
         const row = buildRow(tbody.children.length + 1);
         tbody.appendChild(row);
         const sel = row.querySelector('.select2-item');
-        initSelect2Item(sel);
+        initSelect2Item(sel, '', '');
         bindOtherToggle(sel.closest('tr'));
-        $(sel).trigger('change');
         refresh();
     });
 
@@ -554,12 +674,11 @@
         refresh();
     });
 
-    // ── Supplier, Department & Status Select2 ────────────────────
+    refresh();
+
     $('.select2-supplier').select2({ theme: 'bootstrap4' });
     $('.select2-department').select2({ theme: 'bootstrap4' });
     $('.select2-status').select2({ theme: 'bootstrap4' });
-
-    refresh();
 
 })();
 </script>

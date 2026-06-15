@@ -148,7 +148,7 @@
                                     <tr>
                                         <th class="text-center" style="width:44px;">#</th>
                                         <th>Item</th>
-                                        <th style="width:12%;">Code</th>
+                                        <th style="width:12%;">HS Code</th>
                                         <th style="width:10%;">Qty</th>
                                         <th style="width:10%;">UOM</th>
                                         <th>Notes</th>
@@ -164,8 +164,8 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-secondary font-monospace">
-                                                    {{ $shipmentItem->item->code ?? '-' }}
+                                                <span class="badge bg-primary font-monospace">
+                                                    {{ $shipmentItem->hscode ?? '-' }}
                                                 </span>
                                             </td>
                                             <td class="fw-semibold">{{ $shipmentItem->quantity }}</td>

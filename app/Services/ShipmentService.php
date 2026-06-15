@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Item;
 use App\Models\Status;
 use App\Repositories\Interfaces\ShipmentHistoryRepositoryInterface;
 use App\Repositories\Interfaces\ShipmentItemRepositoryInterface;
@@ -46,13 +47,42 @@ class ShipmentService
         return DB::transaction(function () use ($data, $items) {
             $data['created_by'] = auth()->id();
             $data['status_id']  = Status::where('name', 'Pending')->value('id');
+
+            // 1. Simpan shipment
             $shipment = $this->shipmentRepository->create($data);
 
+            $resolvedItems = [];
+
             foreach ($items as $item) {
-                $this->shipmentItemRepository->create(array_merge($item, ['shipment_id' => $shipment->id]));
+                // 2. firstOrCreate item untuk dapat item_id
+                $itemRecord = Item::firstOrCreate(
+                    ['name' => $item['item_name']],
+                    ['uom'  => $item['uom'] ?? null]
+                );
+
+                // 3. Simpan ke shipment_items
+                $shipmentItem = $this->shipmentItemRepository->create([
+                    'shipment_id' => $shipment->id,
+                    'item_id'     => $itemRecord->id,
+                    'rf'          => $item['rf'] ?? null,
+                    'hscode'      => $item['hscode'] ?? null,
+                    'quantity'    => $item['quantity'] ?? null,
+                    'uom'         => $item['uom'] ?? null,
+                    'notes'       => $item['notes'] ?? null,
+                ]);
+
+                $resolvedItems[] = array_merge($item, [
+                    'item_id' => $itemRecord->id,
+                ]);
             }
 
-            $this->shipmentHistoryRepository->createSnapshot($shipment->toArray(), $items, Auth()->id(), $data['notes']);
+            // 4. Buat snapshot history
+            $this->shipmentHistoryRepository->createSnapshot(
+                $shipment->toArray(),
+                $resolvedItems,
+                auth()->id(),
+                $data['notes'] ?? null
+            );
 
             return $shipment;
         });
@@ -69,17 +99,14 @@ class ShipmentService
 
             $this->shipmentRepository->update($id, $data);
 
-            // ── Sync items (bukan delete+insert) ──────────────────
-            $this->syncShipmentItems($id, $items);
+            // Sync items & dapat resolvedItems dengan item_id
+            $resolvedItems = $this->syncShipmentItems($id, $items);
 
             $updatedShipment = $this->shipmentRepository->find($id);
 
-            // Ambil items untuk disimpan di snapshot
-            $currentItems = $this->shipmentItemRepository->getByShipment($id);
-
             $this->shipmentHistoryRepository->createSnapshot(
                 $updatedShipment->toArray(),
-                $currentItems->toArray(),   // ← snapshot item
+                $resolvedItems,
                 $changedBy,
                 $data['notes'] ?? null
             );
@@ -88,34 +115,56 @@ class ShipmentService
         });
     }
 
-    private function syncShipmentItems(int $shipmentId, array $newItems): void
+    private function syncShipmentItems(int $shipmentId, array $newItems): array
     {
-        $existing = $this->shipmentItemRepository->getByShipment($shipmentId)
-            ->keyBy('item_id');
+        $existing = $this->shipmentItemRepository->getByShipment($shipmentId)->keyBy('rf');
 
-        $incomingItemIds = collect($newItems)->pluck('item_id')->toArray();
+        $incomingRfs = collect($newItems)->pluck('rf')->filter()->toArray();
 
-        // Hapus item yang tidak ada di request (baru benar-benar dihapus)
-        $existing->whereNotIn('item_id', $incomingItemIds)
-            ->each(fn($item) => $item->delete()); // softdelete hanya yang removed
+        // Hapus item yang tidak ada di request
+        $existing->whereNotIn('rf', $incomingRfs)
+            ->each(fn($item) => $item->delete());
+
+        $resolvedItems = [];
 
         foreach ($newItems as $item) {
-            $existingItem = $existing->get($item['item_id']);
+            $uom = $item['uom'] ?? null;
+
+            // firstOrCreate item untuk dapat item_id
+            $itemRecord = Item::firstOrCreate(
+                ['name' => $item['item_name']],
+                ['uom'  => $uom]
+            );
+
+            $existingItem = $existing->get($item['rf'] ?? null);
 
             if ($existingItem) {
-                // Update jika ada perubahan
+                // Update item yang sudah ada
                 $existingItem->update([
-                    'quantity' => $item['quantity'],
-                    'uom'      => $item['uom'],
-                    'notes'    => $item['notes'],
+                    'item_id'  => $itemRecord->id,
+                    'rf'       => $item['rf'] ?? null,
+                    'hscode'   => $item['hscode'] ?? null,
+                    'quantity' => $item['quantity'] ?? null,
+                    'uom'      => $uom,
+                    'notes'    => $item['notes'] ?? null,
                 ]);
             } else {
-                // Insert baru
-                $this->shipmentItemRepository->create(
-                    array_merge($item, ['shipment_id' => $shipmentId])
-                );
+                // Insert item baru
+                $this->shipmentItemRepository->create([
+                    'shipment_id' => $shipmentId,
+                    'item_id'     => $itemRecord->id,
+                    'rf'          => $item['rf'] ?? null,
+                    'hscode'      => $item['hscode'] ?? null,
+                    'quantity'    => $item['quantity'] ?? null,
+                    'uom'         => $uom,
+                    'notes'       => $item['notes'] ?? null,
+                ]);
             }
+
+            $resolvedItems[] = array_merge($item, ['item_id' => $itemRecord->id]);
         }
+
+        return $resolvedItems;
     }
 
     public function updateStatus(int $id, string $statusID, ?string $notes = null)
@@ -140,9 +189,8 @@ class ShipmentService
         return $this->shipmentRepository->delete($id);
     }
 
-    public function getHistory(int $shipmentId,int $historyId)
+    public function getHistory(int $shipmentId, int $historyId)
     {
         return $this->shipmentHistoryRepository->getHistory($shipmentId, $historyId);
     }
-
 }

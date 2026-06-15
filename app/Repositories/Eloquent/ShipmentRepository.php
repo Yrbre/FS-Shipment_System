@@ -48,11 +48,13 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
                 'status',
                 'creator',
                 'items.item',
-                'histories' => fn($q) => $q->orderBy('created_at', 'desc'),
-                'histories.changedBy',
-                'histories.status',
                 'imcVerif.warehouse',
-                'histories.items',
+                'histories' => fn($q) => $q->with([
+                    'changedBy',
+                    'status',
+                    'supplier',
+                    'items.item',
+                ])->orderBy('created_at', 'asc'), // ← asc agar mudah dibandingkan
             ])
             ->findOrFail($id);
     }

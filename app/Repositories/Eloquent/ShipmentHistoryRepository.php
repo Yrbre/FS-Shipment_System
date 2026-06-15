@@ -15,7 +15,8 @@ class ShipmentHistoryRepository extends BaseRepository implements ShipmentHistor
 
     public function createSnapshot(array $shipmentData, array $items, int $changedBy, string $notes = null)
     {
-       $history = $this->model->create([
+        // Simpan header history
+        $history = $this->model->create([
             'shipment_id'   => $shipmentData['id'],
             'po'            => $shipmentData['po'],
             'no_invoice'    => $shipmentData['no_invoice'],
@@ -29,10 +30,12 @@ class ShipmentHistoryRepository extends BaseRepository implements ShipmentHistor
             'notes'         => $notes,
         ]);
 
-        // Insert snapshot items
+        // Simpan snapshot items
         $historyItems = collect($items)->map(fn($item) => [
             'shipment_history_id' => $history->id,
             'item_id'             => data_get($item, 'item_id'),
+            'rf'                  => data_get($item, 'rf'),
+            'hscode'              => data_get($item, 'hscode'),
             'quantity'            => data_get($item, 'quantity'),
             'uom'                 => data_get($item, 'uom'),
             'notes'               => data_get($item, 'notes'),
@@ -40,16 +43,16 @@ class ShipmentHistoryRepository extends BaseRepository implements ShipmentHistor
             'updated_at'          => now(),
         ])->toArray();
 
-        if(!empty($historyItems)) {
-        ShipmentHistoryItems::insert($historyItems);
+        if (!empty($historyItems)) {
+            ShipmentHistoryItems::insert($historyItems);
         }
     }
 
-    public function getHistory(int $shipmentId,int $historyId)
+    public function getHistory(int $shipmentId, int $historyId)
     {
         return $this->model->with('items.item')
-        ->where('shipment_id', $shipmentId)
-        ->where('id', $historyId)
-        ->firstOrFail();
+            ->where('shipment_id', $shipmentId)
+            ->where('id', $historyId)
+            ->firstOrFail();
     }
 }

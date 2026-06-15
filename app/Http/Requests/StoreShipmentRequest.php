@@ -6,19 +6,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreShipmentRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -33,12 +25,12 @@ class StoreShipmentRequest extends FormRequest
             'notes'         => 'nullable|string',
 
             // Items
-            'item_id'         => 'required|array|min:1',
-            'item_id.*'       => ['required', function ($attribute, $value, $fail) {
-                if ($value !== 'other' && !is_numeric($value)) {
-                    $fail('Item tidak valid.');
-                }
-            }],
+            'rf'              => 'required|array|min:1',
+            'rf.*'            => 'nullable|string|max:100',
+            'item_name'       => 'required|array|min:1',
+            'item_name.*'     => 'nullable|string|max:255',
+            'hscode'          => 'nullable|array',
+            'hscode.*'        => 'nullable|string|max:50',
             'new_item_name'   => 'nullable|array',
             'new_item_name.*' => 'nullable|string|max:255',
             'quantity'        => 'required|array',
@@ -53,19 +45,28 @@ class StoreShipmentRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            $itemIds      = $this->input('item_id', []);      // ← tanpa array_values
-            $newItemNames = $this->input('new_item_name', []); // ← tanpa array_values
+            $rfs          = $this->input('rf', []);
+            $newItemNames = $this->input('new_item_name', []);
 
-            foreach ($itemIds as $index => $itemId) {
-                if ($itemId === 'other') {
+            foreach ($rfs as $index => $rf) {
+                // Jika rf kosong = Other (New Item)
+                if (empty($rf)) {
                     $name = $newItemNames[$index] ?? null;
                     if (empty(trim($name ?? ''))) {
                         $validator->errors()->add(
-                            "new_item_name.{$index}", // ← index sama dengan yang di Blade
+                            "new_item_name.{$index}",
                             'Item name wajib diisi jika memilih Other.'
                         );
                     }
                 }
+            }
+
+            // Pastikan minimal ada 1 item valid
+            $hasValidItem = collect($rfs)->contains(fn($rf) => !empty($rf))
+                || collect($newItemNames)->contains(fn($name) => !empty(trim($name ?? '')));
+
+            if (!$hasValidItem) {
+                $validator->errors()->add('rf', 'Minimal satu item harus diisi.');
             }
         });
     }
@@ -80,7 +81,9 @@ class StoreShipmentRequest extends FormRequest
             'department_id' => 'Department',
             'etd'           => 'ETD',
             'eta'           => 'ETA',
-            'item_id.*'     => 'Item',
+            'rf.*'          => 'Item',
+            'item_name.*'   => 'Nama Item',
+            'hscode.*'      => 'HS Code',
             'quantity.*'    => 'Quantity',
             'uom.*'         => 'UOM',
         ];

@@ -118,13 +118,18 @@ class ShipmentController extends Controller
                 'eta',
                 'notes',
             ]);
+
             $items = $this->resolveItems($request);
+
             $this->shipmentService->create($data, $items);
+
             return redirect()
                 ->route('shipments.index')
                 ->with('success', 'Shipment berhasil dibuat.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal Menyimpan Shipment: ' . $e->getMessage())->withInput();
+            return redirect()->back()
+                ->with('error', 'Gagal Menyimpan Shipment: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
@@ -194,53 +199,129 @@ class ShipmentController extends Controller
         }
     }
 
-public function history(int $shipment, int $history)
+    public function history(int $id)
 {
     try {
-        $history = $this->shipmentService->getHistory($shipment, $history);
-        $shipment = $this->shipmentService->findWithRelations($shipment);
-        return view('pages.shipment.viewDetailHistory', compact('history', 'shipment'));
+        $shipment = $this->shipmentService->findWithRelations($id);
+
+        $historiesSorted = $shipment->histories->values();
+
+        $historyDiffs = [];
+
+        foreach ($historiesSorted as $idx => $history) {
+            $prev = $idx > 0 ? $historiesSorted[$idx - 1] : null;
+
+            $shipmentFields = ['po', 'no_invoice', 'no_bl', 'supplier_id', 'status_id', 'etd', 'eta'];
+            $changedFields  = [];
+
+            if ($prev) {
+                foreach ($shipmentFields as $field) {
+                    $currVal = $this->normalizeValue($field, $history->{$field} ?? '');
+                    $prevVal = $this->normalizeValue($field, $prev->{$field} ?? '');
+
+                    if ($currVal !== $prevVal) {
+                        $changedFields[] = $field;
+                    }
+                }
+            }
+
+
+            $prevItems      = $prev ? $prev->items->keyBy('item_id') : collect();
+            $currItems      = $history->items->keyBy('item_id');
+            $addedItemIds   = $currItems->keys()->diff($prevItems->keys())->toArray();
+            $removedItemIds = $prevItems->keys()->diff($currItems->keys())->toArray();
+
+            $changedItemFields = [];
+            foreach ($currItems as $itemId => $hItem) {
+                $prevItem = $prevItems->get($itemId);
+                if (!$prevItem || in_array($itemId, $addedItemIds)) continue;
+
+                foreach (['item_id', 'hscode', 'quantity', 'uom', 'notes'] as $field) {
+                    if ((string) ($prevItem->{$field} ?? '') !== (string) ($hItem->{$field} ?? '')) {
+                        $changedItemFields[$itemId][] = $field;
+                    }
+                }
+            }
+
+            $historyDiffs[$history->id] = [
+                'prev'              => $prev,
+                'changedFields'     => $changedFields,
+                'addedItemIds'      => $addedItemIds,
+                'removedItemIds'    => $removedItemIds,
+                'changedItemFields' => $changedItemFields,
+                'prevItems'         => $prevItems,
+            ];
+        }
+
+        return view('pages.shipment.viewDetailHistory', compact('shipment', 'historyDiffs'));
+
     } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Gagal Memuat History: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Gagal Memuat Detail Shipment: ' . $e->getMessage());
     }
 }
+
+    private function normalizeValue(string $field, $value): string
+    {
+        if (empty($value)) return '';
+
+        $dateFields = ['etd', 'eta'];
+        if (in_array($field, $dateFields)) {
+            try {
+                return \Carbon\Carbon::parse($value)->format('Y-m-d');
+            } catch (\Exception $e) {
+                return (string) $value;
+            }
+        }
+
+        return (string) $value;
+    }
 
 
 
     // ── Resolve item_id + handle "other" via firstOrCreate ────────
-    private function resolveItems(FormRequest $request): array
+    private function resolveItems(Request $request): array
     {
-        $itemIds      = $request->input('item_id', []);
+        $rfs          = $request->input('rf', []);
+        $itemNames    = $request->input('item_name', []);
+        $hscodes      = $request->input('hscode', []);
         $newItemNames = $request->input('new_item_name', []);
         $quantities   = $request->input('quantity', []);
         $uoms         = $request->input('uom', []);
         $notes        = $request->input('item_notes', []);
 
-        return collect($itemIds)
-            ->map(function ($itemId, $index) use ($newItemNames, $quantities, $uoms, $notes) {
-                if ($itemId === 'other') {
-                    $name = $newItemNames[$index] ?? null;
+        return collect($rfs)
+            ->map(function ($rf, $index) use ($itemNames, $hscodes, $newItemNames, $quantities, $uoms, $notes) {
 
-                    // Guard: jika nama kosong, skip item ini
-                    if (empty($name)) {
-                        return null;
-                    }
+                $uom = $uoms[$index] ?? null;
 
-                    $itemId = $this->itemService
-                        ->firstOrCreateByName($name, $uoms[$index] ?? null)
-                        ->id;
+                // Other (New Item) — rf kosong
+                if (empty($rf)) {
+                    $newName = $newItemNames[$index] ?? null;
+
+                    if (empty($newName)) return null;
+
+                    return [
+                        'rf'       => null,
+                        'item_name' => $newName,
+                        'hscode'   => null,
+                        'quantity' => $quantities[$index] ?? null,
+                        'uom'      => $uom,
+                        'notes'    => $notes[$index] ?? null,
+                    ];
                 }
 
+                // Item dari API
                 return [
-                    'item_id'  => $itemId,
-                    'quantity' => $quantities[$index] ?? null,
-                    'uom'      => $uoms[$index] ?? null,
-                    'notes'    => $notes[$index] ?? null,
+                    'rf'        => $rf,
+                    'item_name' => $itemNames[$index] ?? null,
+                    'hscode'    => $hscodes[$index] ?? null,
+                    'quantity'  => $quantities[$index] ?? null,
+                    'uom'       => $uom,
+                    'notes'     => $notes[$index] ?? null,
                 ];
             })
-            ->filter()                          // buang null (item dengan nama kosong)
-            ->unique('item_id')                 // buang duplicate item_id
-            ->values()                          // reset index
+            ->filter()
+            ->values()
             ->toArray();
     }
 
