@@ -14,12 +14,14 @@
                 <li class="nav-item">
                     <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
                 </li>
-
+                @can('master')
                 <li class="nav-item dropdown">
                     <a href="#" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="ml-lg-2">Master</span>
                     </a>
+                @endcan
+
                     <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
                         @can('master.department.view')
                             <a class="nav-link pl-lg-2" href="{{ route('master.departments.index') }}"><span
@@ -45,6 +47,11 @@
                         @can('master.user.view')
                             <a class="nav-link pl-lg-2" href="{{ route('master.users.index') }}"><span
                                     class="ml-1">Users</span></a>
+                        @endcan
+
+                        @can('master.role.view')
+                            <a class="nav-link pl-lg-2" href="{{ route('master.roles.index') }}"><span
+                                    class="ml-1">Role</span></a>
                         @endcan
 
                         @can('master.warehouse.view')

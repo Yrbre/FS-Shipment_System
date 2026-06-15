@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Repositories\Eloquent\DepartmentRepository;
 use App\Repositories\Eloquent\ImcVerifRepository;
 use App\Repositories\Eloquent\ItemRepository;
+use App\Repositories\Eloquent\RoleRepository;
 use App\Repositories\Eloquent\ShipmentHistoryRepository;
 use App\Repositories\Eloquent\ShipmentItemRepository;
 use App\Repositories\Eloquent\ShipmentRepository;
@@ -15,6 +16,7 @@ use App\Repositories\Eloquent\WarehouseRepository;
 use App\Repositories\Interfaces\DepartmentRepositoryInterface;
 use App\Repositories\Interfaces\ImcVerifRepositoryInterface;
 use App\Repositories\Interfaces\ItemRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Interfaces\ShipmentHistoryRepositoryInterface;
 use App\Repositories\Interfaces\ShipmentItemRepositoryInterface;
 use App\Repositories\Interfaces\ShipmentRepositoryInterface;
@@ -41,6 +43,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ShipmentHistoryRepositoryInterface::class, ShipmentHistoryRepository::class);
         $this->app->bind(ImcVerifRepositoryInterface::class, ImcVerifRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
     }
 
     /**

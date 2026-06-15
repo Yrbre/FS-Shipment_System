@@ -3,6 +3,7 @@
 use App\Http\Controllers\ImcVerifController;
 use App\Http\Controllers\Master\DepartmentController;
 use App\Http\Controllers\Master\ItemController;
+use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\StatusController;
 use App\Http\Controllers\Master\SupplierController;
 use App\Http\Controllers\Master\UserController;
@@ -39,6 +40,7 @@ Route::middleware(['auth', 'verified'])->prefix('master')->name('master.')->grou
     Route::resource('items', ItemController::class);
     Route::resource('statuses', StatusController::class);
     Route::resource('users', UserController::class);
+    Route::resource('roles', RoleController::class);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
