@@ -354,7 +354,7 @@
     const tbody     = document.getElementById('items-body');
     const addRowBtn = document.getElementById('btn-add-row');
     const badge     = document.getElementById('item-count-badge');
-    const API_URL   = 'http://vapps/hscode/api/data';
+    const API_URL = '{{ config('services.native_api.url') }}/data';
 
     // ── Init Select2 AJAX item ────────────────────────────────────
     function initSelect2Item(el, selectedRf, selectedText) {
