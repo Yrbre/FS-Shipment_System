@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImcVerifController;
 use App\Http\Controllers\Master\DepartmentController;
 use App\Http\Controllers\Master\ItemController;
@@ -28,9 +29,9 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 
 Route::middleware(['auth', 'verified'])->prefix('master')->name('master.')->group(function () {
