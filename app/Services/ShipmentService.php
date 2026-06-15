@@ -46,7 +46,7 @@ class ShipmentService
     {
         return DB::transaction(function () use ($data, $items) {
             $data['created_by'] = auth()->id();
-            $data['status_id']  = Status::where('name', 'Pending')->value('id');
+            $data['status_id']  = Status::where('name', 'Draft')->value('id');
 
             // 1. Simpan shipment
             $shipment = $this->shipmentRepository->create($data);

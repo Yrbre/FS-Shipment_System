@@ -64,9 +64,9 @@ class ShipmentController extends Controller
                     ->addColumn('status', function ($row) {
                         $classStatus = match ($row->status->name ?? '') {
                             'Pending' => 'badge badge-warning',
-                            'Completed' => 'badge badge-success',
+                            'Delivered' => 'badge badge-success',
                             'Rejected' => 'badge badge-danger',
-                            'On The Way' => 'badge badge-info',
+                            'Process' => 'badge badge-info',
                             default => 'badge badge-secondary',
                         };
                         return '<span class="' . $classStatus . '">' . ($row->status->name ?? '-') . '</span>';

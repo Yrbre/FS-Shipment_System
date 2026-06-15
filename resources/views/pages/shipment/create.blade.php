@@ -89,7 +89,8 @@
                                     <label for="department_id" class="form-label text-white">
                                         Department <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-control select2-department @error('department_id') is-invalid @enderror"
+                                    <select
+                                        class="form-control select2-department @error('department_id') is-invalid @enderror"
                                         id="simple-select2-department" name="department_id">
                                         <optgroup label="Select Department">
                                             <option value="" selected disabled>Select Department</option>
@@ -130,8 +131,7 @@
 
                                 <div class="col-md-12 mt-2">
                                     <label for="notes" class="form-label text-white">Notes</label>
-                                    <textarea class="form-control @error('notes') is-invalid @enderror"
-                                        id="notes" name="notes" rows="2"
+                                    <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="2"
                                         placeholder="Additional notes for this shipment...">{{ old('notes') }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -179,22 +179,18 @@
                                     <tbody id="items-body">
 
                                         @if (old('rf'))
-                                            {{-- Restore rows on validation fail --}}
                                             @foreach (old('rf') as $index => $oldRf)
                                                 @php
-                                                    $oldItemName  = old('item_name.' . $index, '');
-                                                    $oldHscode    = old('hscode.' . $index, '');
-                                                    $oldNewName   = old('new_item_name.' . $index, '');
-                                                    $isOther      = empty($oldRf);
+                                                    $oldItemName = old('item_name.' . $index, '');
+                                                    $oldHscode = old('hscode.' . $index, '');
+                                                    $oldNewName = old('new_item_name.' . $index, '');
+                                                    $isOther = empty($oldRf);
                                                 @endphp
-                                                <tr
-                                                    data-selected-rf="{{ $oldRf }}"
+                                                <tr data-selected-rf="{{ $oldRf }}"
                                                     data-selected-text="{{ $oldItemName ? '[' . $oldRf . '] ' . $oldItemName : '' }}"
                                                     data-selected-hscode="{{ $oldHscode }}">
 
                                                     <td class="text-center text-muted row-num">{{ $index + 1 }}</td>
-
-                                                    {{-- Item Select --}}
                                                     <td>
                                                         <select
                                                             class="form-control form-control-sm select2-item @error('rf.' . $index) is-invalid @enderror"
@@ -208,69 +204,54 @@
                                                                 ➕ Other (New Item)
                                                             </option>
                                                         </select>
-
-                                                        {{-- Hidden fields yang dikirim ke controller --}}
-                                                        <input type="hidden" name="rf[]"        value="{{ $oldRf }}">
-                                                        <input type="hidden" name="item_name[]" value="{{ $oldItemName }}">
-
+                                                        <input type="hidden" name="rf[]"
+                                                            value="{{ $oldRf }}">
+                                                        <input type="hidden" name="item_name[]"
+                                                            value="{{ $oldItemName }}">
                                                         @error('rf.' . $index)
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                                         @enderror
                                                     </td>
-
-                                                    {{-- HS Code --}}
                                                     <td>
                                                         <input type="text"
                                                             class="form-control form-control-sm item-hscode"
-                                                            name="hscode[]"
-                                                            value="{{ $oldHscode }}"
+                                                            name="hscode[]" value="{{ $oldHscode }}"
                                                             placeholder="HS Code" readonly
                                                             style="{{ $oldHscode ? '' : 'opacity:.4; background:transparent;' }}">
                                                     </td>
-
-                                                    {{-- New Item Name --}}
                                                     <td>
                                                         <input type="text"
                                                             class="form-control form-control-sm new-item-name @error('new_item_name.' . $index) is-invalid @enderror"
-                                                            name="new_item_name[]"
-                                                            value="{{ $oldNewName }}"
-                                                            placeholder="Item name..."
-                                                            {{ $isOther ? '' : 'readonly' }}
+                                                            name="new_item_name[]" value="{{ $oldNewName }}"
+                                                            placeholder="Item name..." {{ $isOther ? '' : 'readonly' }}
                                                             style="{{ $isOther ? '' : 'opacity:.4; background:transparent;' }}">
                                                         @error('new_item_name.' . $index)
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                                         @enderror
                                                     </td>
-
                                                     <td>
                                                         <input type="number"
                                                             class="form-control form-control-sm @error('quantity.' . $index) is-invalid @enderror"
-                                                            name="quantity[]"
-                                                            value="{{ old('quantity.' . $index) }}"
+                                                            name="quantity[]" value="{{ old('quantity.' . $index) }}"
                                                             placeholder="0" min="0" step="0.01">
                                                         @error('quantity.' . $index)
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
                                                     </td>
-
                                                     <td>
                                                         <input type="text"
                                                             class="form-control form-control-sm item-uom @error('uom.' . $index) is-invalid @enderror"
-                                                            name="uom[]"
-                                                            value="{{ old('uom.' . $index) }}"
+                                                            name="uom[]" value="{{ old('uom.' . $index) }}"
                                                             placeholder="e.g. PCS">
                                                         @error('uom.' . $index)
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
                                                     </td>
-
                                                     <td>
                                                         <input type="text" class="form-control form-control-sm"
-                                                            name="item_notes[]"
-                                                            value="{{ old('item_notes.' . $index) }}"
+                                                            name="item_notes[]" value="{{ old('item_notes.' . $index) }}"
                                                             placeholder="Notes...">
                                                     </td>
-
                                                     <td class="text-center">
                                                         <button type="button"
                                                             class="btn btn-sm btn-outline-danger btn-delete-row"
@@ -281,14 +262,14 @@
                                                 </tr>
                                             @endforeach
                                         @else
-                                            {{-- Default empty row --}}
                                             <tr>
                                                 <td class="text-center text-muted row-num">1</td>
                                                 <td>
-                                                    <select class="form-control form-control-sm select2-item" name="rf_select[]">
+                                                    <select class="form-control form-control-sm select2-item"
+                                                        name="rf_select[]">
                                                         <option value="other">➕ Other (New Item)</option>
                                                     </select>
-                                                    <input type="hidden" name="rf[]"        value="">
+                                                    <input type="hidden" name="rf[]" value="">
                                                     <input type="hidden" name="item_name[]" value="">
                                                 </td>
                                                 <td>
@@ -297,7 +278,8 @@
                                                         style="opacity:.4; background:transparent;">
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control form-control-sm new-item-name"
+                                                    <input type="text"
+                                                        class="form-control form-control-sm new-item-name"
                                                         name="new_item_name[]" placeholder="Item name..." readonly
                                                         style="opacity:.4; background:transparent;">
                                                 </td>
@@ -342,7 +324,7 @@
                     <div class="mr-2">
                         <a href="{{ route('shipments.index') }}" class="btn btn-secondary">Cancel</a>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <button type="button" class="btn btn-primary" id="submitBtn">
                         <i class="fa-solid fa-paper-plane me-1"></i> Submit Shipment
                     </button>
                 </div>
@@ -353,130 +335,133 @@
 @endsection
 
 @push('scripts')
-<script>
-(function () {
+    <script>
+        (function() {
 
-    const tbody     = document.getElementById('items-body');
-    const addRowBtn = document.getElementById('btn-add-row');
-    const badge     = document.getElementById('item-count-badge');
-    const API_URL   = 'http://vapps/hscode/api/data';
+            const tbody = document.getElementById('items-body');
+            const addRowBtn = document.getElementById('btn-add-row');
+            const badge = document.getElementById('item-count-badge');
+            const API_URL = 'http://vapps/hscode/api/data';
 
-    // ── Init Select2 AJAX ─────────────────────────────────────────
-    function initSelect2Item(el, selectedRf, selectedText) {
-        const $el = $(el);
+            // ── Init Select2 AJAX ─────────────────────────────────────────
+            function initSelect2Item(el, selectedRf, selectedText) {
+                const $el = $(el);
 
-        if (selectedRf && selectedRf !== 'other') {
-            if ($el.find('option[value="' + selectedRf + '"]').length === 0) {
-                $el.prepend(new Option(selectedText, selectedRf, true, true));
-            }
-        }
-
-        $el.select2({
-            theme: 'bootstrap4',
-            width: '100%',
-            placeholder: '-- Ketik untuk mencari item --',
-            allowClear: true,
-            minimumInputLength: 1,
-            ajax: {
-                url: API_URL,
-                dataType: 'json',
-                delay: 300,
-                data: function (params) {
-                    return { search: params.term, limit: 20 };
-                },
-                processResults: function (response) {
-                    if (response.status !== 'success') return { results: [] };
-
-                    const results = response.data.map(function (d) {
-                        return {
-                            id:        d.rf,
-                            text:      '[' + d.rf + '] ' + d.item,
-                            rf:        d.rf,
-                            item_name: d.item,
-                            hscode:    d.hscode,
-                        };
-                    });
-
-                    results.push({ id: 'other', text: '➕ Other (New Item)', rf: '', item_name: '', hscode: '' });
-
-                    return { results: results };
-                },
-                cache: true,
-            },
-        });
-    }
-
-    // ── Handle pilihan item ───────────────────────────────────────
-    function bindOtherToggle(row) {
-        const sel          = row.querySelector('.select2-item');
-        const nameInput    = row.querySelector('.new-item-name');
-        const uomInput     = row.querySelector('.item-uom');
-        const hsInput      = row.querySelector('.item-hscode');
-        const rfInput      = row.querySelector('input[name="rf[]"]');
-        const itemNameInput = row.querySelector('input[name="item_name[]"]');
-
-        $(sel).on('select2:select', function (e) {
-            const data = e.params.data;
-
-            if (data.id === 'other') {
-                // Other dipilih — isi rf & item_name kosong
-                if (rfInput)       rfInput.value       = '';
-                if (itemNameInput) itemNameInput.value = '';
-
-                nameInput.readOnly         = false;
-                nameInput.style.opacity    = '1';
-                nameInput.style.background = '';
-                uomInput.value             = '';
-                uomInput.readOnly          = false;
-
-                if (hsInput) {
-                    hsInput.value            = '';
-                    hsInput.style.opacity    = '.4';
-                    hsInput.style.background = 'transparent';
+                if (selectedRf && selectedRf !== 'other') {
+                    if ($el.find('option[value="' + selectedRf + '"]').length === 0) {
+                        $el.prepend(new Option(selectedText, selectedRf, true, true));
+                    }
                 }
 
-                setTimeout(() => nameInput.focus(), 50);
+                $el.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    placeholder: '-- Ketik untuk mencari item --',
+                    allowClear: true,
+                    minimumInputLength: 1,
+                    ajax: {
+                        url: API_URL,
+                        dataType: 'json',
+                        delay: 300,
+                        data: function(params) {
+                            return {
+                                search: params.term,
+                                limit: 20
+                            };
+                        },
+                        processResults: function(response) {
+                            if (response.status !== 'success') return {
+                                results: []
+                            };
 
-            } else {
-                // Item dari API — isi hidden fields
-                if (rfInput)       rfInput.value       = data.rf        || '';
-                if (itemNameInput) itemNameInput.value = data.item_name || '';
+                            const results = response.data.map(function(d) {
+                                return {
+                                    id: d.rf,
+                                    text: '[' + d.rf + '] ' + d.item,
+                                    rf: d.rf,
+                                    item_name: d.item,
+                                    hscode: d.hscode,
+                                };
+                            });
 
-                nameInput.readOnly         = true;
-                nameInput.style.opacity    = '.4';
-                nameInput.style.background = 'transparent';
-                nameInput.value            = '';
-                uomInput.readOnly          = false;
+                            results.push({
+                                id: 'other',
+                                text: '➕ Other (New Item)',
+                                rf: '',
+                                item_name: '',
+                                hscode: ''
+                            });
 
-                if (hsInput) {
-                    hsInput.value            = data.hscode || '';
-                    hsInput.style.opacity    = data.hscode ? '1' : '.4';
-                    hsInput.style.background = data.hscode ? '' : 'transparent';
-                }
+                            return {
+                                results: results
+                            };
+                        },
+                        cache: true,
+                    },
+                });
             }
-        });
 
-        $(sel).on('select2:clear', function () {
-            if (rfInput)       rfInput.value       = '';
-            if (itemNameInput) itemNameInput.value = '';
+            // ── Handle pilihan item ───────────────────────────────────────
+            function bindOtherToggle(row) {
+                const sel = row.querySelector('.select2-item');
+                const nameInput = row.querySelector('.new-item-name');
+                const uomInput = row.querySelector('.item-uom');
+                const hsInput = row.querySelector('.item-hscode');
+                const rfInput = row.querySelector('input[name="rf[]"]');
+                const itemNameInput = row.querySelector('input[name="item_name[]"]');
 
-            nameInput.readOnly         = true;
-            nameInput.style.opacity    = '.4';
-            nameInput.style.background = 'transparent';
-            nameInput.value            = '';
+                $(sel).on('select2:select', function(e) {
+                    const data = e.params.data;
 
-            if (hsInput) {
-                hsInput.value            = '';
-                hsInput.style.opacity    = '.4';
-                hsInput.style.background = 'transparent';
+                    if (data.id === 'other') {
+                        if (rfInput) rfInput.value = '';
+                        if (itemNameInput) itemNameInput.value = '';
+                        nameInput.readOnly = false;
+                        nameInput.style.opacity = '1';
+                        nameInput.style.background = '';
+                        uomInput.value = '';
+                        uomInput.readOnly = false;
+                        if (hsInput) {
+                            hsInput.value = '';
+                            hsInput.style.opacity = '.4';
+                            hsInput.style.background = 'transparent';
+                        }
+                        setTimeout(() => nameInput.focus(), 50);
+                    } else {
+                        if (rfInput) rfInput.value = data.rf || '';
+                        if (itemNameInput) itemNameInput.value = data.item_name || '';
+                        nameInput.readOnly = true;
+                        nameInput.style.opacity = '.4';
+                        nameInput.style.background = 'transparent';
+                        nameInput.value = '';
+                        uomInput.readOnly = false;
+                        if (hsInput) {
+                            hsInput.value = data.hscode || '';
+                            hsInput.style.opacity = data.hscode ? '1' : '.4';
+                            hsInput.style.background = data.hscode ? '' : 'transparent';
+                        }
+                    }
+                });
+
+                $(sel).on('select2:clear', function() {
+                    if (rfInput) rfInput.value = '';
+                    if (itemNameInput) itemNameInput.value = '';
+                    nameInput.readOnly = true;
+                    nameInput.style.opacity = '.4';
+                    nameInput.style.background = 'transparent';
+                    nameInput.value = '';
+                    if (hsInput) {
+                        hsInput.value = '';
+                        hsInput.style.opacity = '.4';
+                        hsInput.style.background = 'transparent';
+                    }
+                });
             }
-        });
-    }
 
-    // ── Build row baru ────────────────────────────────────────────
-    function buildRow(num) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+            // ── Build row baru ────────────────────────────────────────────
+            function buildRow(num) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
             <td class="text-center text-muted row-num">${num}</td>
             <td>
                 <select class="form-control form-control-sm select2-item" name="rf_select[]"></select>
@@ -511,67 +496,236 @@
                 </button>
             </td>
         `;
-        return tr;
-    }
+                return tr;
+            }
 
-    // ── Renumber + badge ──────────────────────────────────────────
-    function refresh() {
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach((tr, i) => {
-            const cell = tr.querySelector('.row-num');
-            if (cell) cell.textContent = i + 1;
-        });
-        const n = rows.length;
-        badge.textContent = n + (n === 1 ? ' item' : ' items');
-    }
+            // ── Renumber + badge ──────────────────────────────────────────
+            function refresh() {
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach((tr, i) => {
+                    const cell = tr.querySelector('.row-num');
+                    if (cell) cell.textContent = i + 1;
+                });
+                const n = rows.length;
+                badge.textContent = n + (n === 1 ? ' item' : ' items');
+            }
 
-    // ── Init semua row yang sudah ada ─────────────────────────────
-    tbody.querySelectorAll('tr').forEach(row => {
-        const sel        = row.querySelector('.select2-item');
-        const selectedRf = row.dataset.selectedRf   || '';
-        const selectedTx = row.dataset.selectedText || '';
-        if (sel) {
-            initSelect2Item(sel, selectedRf, selectedTx);
-            bindOtherToggle(row);
-        }
-    });
+            // ── Format tanggal YYYY-MM-DD → DD-MM-YYYY ───────────────────
+            function formatDate(val) {
+                if (!val) return '-';
+                const months = [
+                    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+                ];
+                const parts = val.split('-');
+                if (parts.length !== 3) return val;
+                const day = parts[2];
+                const month = months[parseInt(parts[1], 10) - 1] || parts[1];
+                const year = parts[0];
+                return day + ' ' + month + ' ' + year;
+            }
 
-    // ── Add row ───────────────────────────────────────────────────
-    addRowBtn.addEventListener('click', function () {
-        const row = buildRow(tbody.children.length + 1);
-        tbody.appendChild(row);
-        const sel = row.querySelector('.select2-item');
-        initSelect2Item(sel, '', '');
-        bindOtherToggle(sel.closest('tr'));
-        refresh();
-    });
+            // ── Init semua row yang sudah ada ─────────────────────────────
+            tbody.querySelectorAll('tr').forEach(row => {
+                const sel = row.querySelector('.select2-item');
+                const selectedRf = row.dataset.selectedRf || '';
+                const selectedTx = row.dataset.selectedText || '';
+                if (sel) {
+                    initSelect2Item(sel, selectedRf, selectedTx);
+                    bindOtherToggle(row);
+                }
+            });
 
-    // ── Delete row ────────────────────────────────────────────────
-    tbody.addEventListener('click', function (e) {
-        const btn = e.target.closest('.btn-delete-row');
-        if (!btn) return;
-        if (tbody.children.length <= 1) return;
-        const row = btn.closest('tr');
-        const sel = row.querySelector('.select2-item');
-        if (sel && $(sel).data('select2')) $(sel).select2('destroy');
-        row.remove();
-        refresh();
-    });
+            // ── Add row ───────────────────────────────────────────────────
+            addRowBtn.addEventListener('click', function() {
+                const row = buildRow(tbody.children.length + 1);
+                tbody.appendChild(row);
+                const sel = row.querySelector('.select2-item');
+                initSelect2Item(sel, '', '');
+                bindOtherToggle(sel.closest('tr'));
+                refresh();
+            });
 
-    refresh();
+            // ── Delete row ────────────────────────────────────────────────
+            tbody.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-delete-row');
+                if (!btn) return;
+                if (tbody.children.length <= 1) return;
+                const row = btn.closest('tr');
+                const sel = row.querySelector('.select2-item');
+                if (sel && $(sel).data('select2')) $(sel).select2('destroy');
+                row.remove();
+                refresh();
+            });
 
-    $('.select2-supplier').select2({ theme: 'bootstrap4' });
-    $('.select2-department').select2({ theme: 'bootstrap4' });
+            refresh();
 
-})();
-</script>
+            $('.select2-supplier').select2({
+                theme: 'bootstrap4'
+            });
+            $('.select2-department').select2({
+                theme: 'bootstrap4'
+            });
 
-<script>
-    document.getElementById('myForm').addEventListener('submit', function (e) {
-        const btn = document.getElementById('submitBtn');
-        if (btn.disabled) { e.preventDefault(); return; }
-        btn.disabled    = true;
-        btn.textContent = 'Loading...';
-    });
-</script>
+            // ── Konfirmasi Submit ─────────────────────────────────────────
+            document.getElementById('submitBtn').addEventListener('click', function() {
+
+                // Kumpulkan data shipment
+                const po = document.getElementById('po').value.trim() || '-';
+                const no_invoice = document.getElementById('no_invoice').value.trim() || '-';
+                const no_bl = document.getElementById('no_bl').value.trim() || '-';
+                const etd = formatDate(document.getElementById('etd').value);
+                const eta = formatDate(document.getElementById('eta').value);
+                const notes = document.getElementById('notes').value.trim() || '-';
+
+                const supplierEl = document.getElementById('simple-select2-supplier');
+                const supplierText = supplierEl.options[supplierEl.selectedIndex]?.text || '-';
+
+                const deptEl = document.getElementById('simple-select2-department');
+                const deptText = deptEl.options[deptEl.selectedIndex]?.text || '-';
+
+                // Kumpulkan items
+                const rows = tbody.querySelectorAll('tr');
+                let itemRows = '';
+                rows.forEach(function(row, idx) {
+                    const rfInput = row.querySelector('input[name="rf[]"]');
+                    const nameHidden = row.querySelector('input[name="item_name[]"]');
+                    const nameInput = row.querySelector('.new-item-name');
+                    const hsInput = row.querySelector('.item-hscode');
+                    const qtyInput = row.querySelector('input[name="quantity[]"]');
+                    const uomInput = row.querySelector('.item-uom');
+                    const notesInput = row.querySelector('input[name="item_notes[]"]');
+
+                    const rf = rfInput ? rfInput.value.trim() : '';
+                    const itemName = rf ?
+                        (nameHidden ? nameHidden.value.trim() : '') :
+                        (nameInput ? nameInput.value.trim() : '');
+                    const hs = hsInput ? (hsInput.value.trim() || '-') : '-';
+                    const qty = qtyInput ? (qtyInput.value.trim() || '-') : '-';
+                    const uom = uomInput ? (uomInput.value.trim() || '-') : '-';
+                    const itemNote = notesInput ? (notesInput.value.trim() || '-') : '-';
+
+                    itemRows += `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.07);">
+                    <td style="padding:6px 10px; color:#aaa; vertical-align:top;">${idx + 1}</td>
+                    <td style="padding:6px 10px; vertical-align:top; word-break:break-word;">${itemName || '-'}</td>
+                    <td style="padding:6px 10px; vertical-align:top;">${hs}</td>
+                    <td style="padding:6px 10px; vertical-align:top;">${qty}</td>
+                    <td style="padding:6px 10px; vertical-align:top;">${uom}</td>
+                    <td style="padding:6px 10px; vertical-align:top; word-break:break-word;">${itemNote}</td>
+                </tr>
+            `;
+                });
+
+                // Tampilkan konfirmasi
+                Swal.fire({
+                    title: '<i class="fa-solid fa-paper-plane mr-2"></i> Konfirmasi Shipment',
+                    theme: 'dark',
+                    width: '90%',
+                    customClass: {
+                        popup: 'swal-shipment-popup',
+                        htmlContainer: 'swal-shipment-html',
+                    },
+                    html: `
+                <style>
+                    .swal-shipment-popup  { max-width: 900px !important; }
+                    .swal-shipment-html   { text-align: left !important; font-size: 0.875rem; }
+                    .swal-info-table      { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+                    .swal-info-table td   { padding: 5px 10px; vertical-align: top; }
+                    .swal-info-table .lbl { color: #aaa; width: 40%; }
+                    .swal-info-table .val { font-weight: 600; }
+                    .swal-section-title   {
+                        font-size: 0.7rem;
+                        text-transform: uppercase;
+                        letter-spacing: 0.07em;
+                        color: #aaa;
+                        margin-bottom: 8px;
+                        padding-bottom: 4px;
+                        border-bottom: 1px solid rgba(255,255,255,0.1);
+                    }
+                    .swal-item-table      { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+                    .swal-item-table th   {
+                        padding: 6px 10px;
+                        background: rgba(255,255,255,0.05);
+                        color: #ccc;
+                        text-align: left;
+                        border-bottom: 1px solid rgba(255,255,255,0.1);
+                    }
+                    .swal-item-table td   { color: #eee; }
+
+                    @media (max-width: 576px) {
+                        .swal-shipment-popup  { width: 100% !important; margin: 0 !important; border-radius: 0 !important; }
+                        .swal-info-table .lbl { width: 45%; font-size: 0.8rem; }
+                        .swal-info-table .val { font-size: 0.8rem; }
+                        .swal-item-table      { font-size: 0.75rem; }
+                        .swal-item-table th,
+                        .swal-item-table td   { padding: 4px 6px; }
+                    }
+                </style>
+
+                {{-- Info Shipment --}}
+                <div class="swal-section-title">Informasi Shipment</div>
+                <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px;">
+                    <div style="flex: 1 1 50%; min-width: 200px;">
+                        <table class="swal-info-table">
+                            <tr><td class="lbl">Purchase Order</td><td class="val">${po}</td></tr>
+                            <tr><td class="lbl">No Invoice</td><td class="val">${no_invoice}</td></tr>
+                            <tr><td class="lbl">No B/L</td><td class="val">${no_bl}</td></tr>
+                        </table>
+                    </div>
+                    <div style="flex: 1 1 50%; min-width: 200px;">
+                        <table class="swal-info-table">
+                            <tr><td class="lbl">Supplier</td><td class="val">${supplierText}</td></tr>
+                            <tr><td class="lbl">Department</td><td class="val">${deptText}</td></tr>
+                            <tr><td class="lbl">ETD</td><td class="val">${etd}</td></tr>
+                            <tr><td class="lbl">ETA</td><td class="val">${eta}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                ${notes !== '-' ? `
+                    <div class="swal-section-title">Catatan</div>
+                    <p style="color:#eee; margin-bottom:16px; font-size:0.85rem;">${notes}</p>
+                    ` : ''}
+
+                {{-- Items --}}
+                <div class="swal-section-title">Items (${rows.length})</div>
+                <div style="overflow-x: auto;">
+                    <table class="swal-item-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nama Item</th>
+                                <th>HS Code</th>
+                                <th>Qty</th>
+                                <th>UOM</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemRows}</tbody>
+                    </table>
+                </div>
+            `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1"></i> Ya, Submit',
+                    cancelButtonText: 'Batal, Cek Lagi',
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#6c757d',
+                    didClose: () => {
+                        document.body.classList.remove('swal2-shown');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        const btn = document.getElementById('submitBtn');
+                        btn.disabled = true;
+                        btn.innerHTML =
+                        '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Submitting...';
+                        document.getElementById('myForm').submit();
+                    }
+                });
+            });
+
+        })();
+    </script>
 @endpush
