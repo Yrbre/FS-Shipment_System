@@ -77,9 +77,10 @@
 {{-- Data Table --}}
         <script>
             $('#dataTable-1').DataTable({
-                autoWidth: true,
+                autoWidth: false,
                 processing: true,
                 serverSide: true,
+                responsive: true,
                 ajax: '{{ route('master.departments.index') }}',
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },

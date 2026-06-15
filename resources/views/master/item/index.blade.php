@@ -19,7 +19,6 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Kode</th>
                                         <th>Nama</th>
                                         <th>Uom</th>
                                         <th>Deskripsi</th>
@@ -77,19 +76,16 @@
         {{-- Data Table --}}
         <script>
             $('#dataTable-1').DataTable({
-                autoWidth: true,
+                autoWidth: false,
                 processing: true,
                 serverSide: true,
+                responsive: true,
                 ajax: '{{ route('master.items.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
-                    },
-                    {
-                        data: 'code',
-                        name: 'code'
                     },
                     {
                         data: 'name',

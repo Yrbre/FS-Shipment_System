@@ -15,7 +15,7 @@
                     <div class="card shadow">
                         <div class="card-body">
 
-                            <table class="table datatables" id="dataTable-1">
+                            <table class="table table-hover datatables" id="dataTable-1">
                                 <thead>
                                     <tr>
                                         <th>No</th>
@@ -90,6 +90,18 @@
                     }
                 });
             });
+        </script>
+        <script>
+            // Data Table
+            $('#dataTable-1').DataTable({
+                autoWidth: false,
+                responsive: true,
+                lengthMenu: [
+                    [16, 32, 64, -1],
+                    [16, 32, 64, 'All']
+                ]
+            });
+
         </script>
     @endpush
 @endsection
