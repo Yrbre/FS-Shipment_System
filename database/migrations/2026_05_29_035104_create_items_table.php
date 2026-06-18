@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('code', 20)->unique();
-            $table->string('name', 150);
+            $table->string('name', 255);
             $table->string('uom', 20);
             $table->text('description')->nullable();
             $table->softDeletes();

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             AdminUserSeeder::class,
             StatusSeeder::class,
+            DepartmentSeeder::class,
         ]);
 
         // Item::factory(1000)->create();

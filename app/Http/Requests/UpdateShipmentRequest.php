@@ -13,24 +13,32 @@ class UpdateShipmentRequest extends FormRequest
 
     public function rules(): array
     {
-        $shipmentId = $this->route('shipment'); // ambil ID dari route
+        $shipmentId = $this->route('shipment');
 
         return [
-            // Shipment — unique ignore current record
             'po'            => "required|string|max:100|unique:shipments,po,{$shipmentId}",
             'no_invoice'    => "required|string|max:100|unique:shipments,no_invoice,{$shipmentId}",
             'no_bl'         => "required|string|max:100|unique:shipments,no_bl,{$shipmentId}",
-            'supplier_id'   => 'required|exists:suppliers,id',
+
+            // ganti exists:suppliers,id -> custom rule, supaya "other" tidak otomatis gagal
+            'supplier_id'   => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if ($value !== 'other' && !\App\Models\Supplier::where('id', $value)->exists()) {
+                        $fail('Supplier tidak valid.');
+                    }
+                },
+            ],
+            'new_supplier_name' => 'required_if:supplier_id,other|nullable|string|max:255',
+
             'department_id' => 'required|exists:departments,id',
             'etd'           => 'required|date',
             'eta'           => 'required|date|after_or_equal:etd',
             'notes'         => 'nullable|string',
 
-            // Status
             'status_id'    => 'nullable|exists:statuses,id',
             'status_notes' => 'nullable|string|max:255',
 
-            // Items
             'rf'              => 'required|array|min:1',
             'rf.*'            => 'nullable|string|max:100',
             'item_name'       => 'required|array|min:1',
@@ -93,6 +101,7 @@ class UpdateShipmentRequest extends FormRequest
             'hscode.*'      => 'HS Code',
             'quantity.*'    => 'Quantity',
             'uom.*'         => 'UOM',
+            'new_supplier_name' => 'Nama Supplier Baru',
         ];
     }
 }

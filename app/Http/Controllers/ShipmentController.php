@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreShipmentRequest;
 use App\Http\Requests\UpdateShipmentRequest;
 use App\Models\Item;
+use App\Models\Supplier;
 use App\Services\HscodeDataService;
 use App\Services\MasterData\DepartmentService;
 use App\Services\MasterData\ItemService;
@@ -117,6 +118,8 @@ class ShipmentController extends Controller
     public function store(StoreShipmentRequest $request)
     {
         try {
+            $uom = $request->input('uom');
+            $data['uom'] = strtoupper(is_array($uom) ? implode(',', $uom) : $uom);
             $data = $request->only([
                 'po',
                 'no_invoice',
@@ -128,9 +131,8 @@ class ShipmentController extends Controller
                 'notes',
             ]);
 
-            // Jika supplier = other, firstOrCreate supplier baru
             if ($data['supplier_id'] === 'other') {
-                $newSupplierName    = trim($request->input('new_supplier_name'));
+                $newSupplierName    = strtoupper(trim($request->input('new_supplier_name', '')));
                 $supplier           = \App\Models\Supplier::firstOrCreate(['name' => $newSupplierName]);
                 $data['supplier_id'] = $supplier->id;
             }
@@ -187,6 +189,14 @@ class ShipmentController extends Controller
                 'status_id',
                 'status_notes',
             ]);
+
+            // Resolve "Other" supplier -> buat / pakai supplier yang sudah ada
+            if ($data['supplier_id'] === 'other') {
+                $supplier = Supplier::firstOrCreate([
+                    'name' => trim($request->input('new_supplier_name')),
+                ]);
+                $data['supplier_id'] = $supplier->id;
+            }
 
             // Jika ada status_notes, gunakan sebagai catatan snapshot history
             if (!empty($data['status_notes'])) {
