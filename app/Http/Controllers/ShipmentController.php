@@ -44,10 +44,16 @@ class ShipmentController extends Controller
         try {
             if ($request->ajax()) {
                 $user = auth()->user();
-                if ($user->hasAnyRole(['Admin', 'Purchasing', 'IMC'])) {
+                if ($user->hasAnyRole(['Admin', 'Purchasing', 'IMC', 'Buyer'])) {
                     $shipments = $this->shipmentService->getAll();
                 } else {
                     $shipments = $this->shipmentService->getByDepartment($user->department_id);
+                }
+
+                if ($request->filled('status')) {
+                    $shipments = $shipments->filter(function ($row) use ($request) {
+                        return strtolower($row->status->name ?? '') === strtolower($request->status);
+                    });
                 }
                 return DataTables::of($shipments)
                     ->addIndexColumn()
@@ -78,7 +84,7 @@ class ShipmentController extends Controller
 
                         if (auth()->user()->can('shipment.edit') && now() < $row->etd) {
                             $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
-                        } elseif (auth()->user()->roles->pluck('name')->contains('Admin')) {
+                        } elseif (auth()->user()->hasAnyRole(['Admin', 'Purchasing'])) {
                             $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
                         }
 
@@ -87,7 +93,9 @@ class ShipmentController extends Controller
                     ->rawColumns(['action', 'status'])
                     ->make(true);
             }
-            return view('pages.shipment.index');
+            return view('pages.shipment.index', [
+                'statusFilter' => $request->get('status'),
+            ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal Memuat Data Shipment: ' . $e->getMessage());
         }

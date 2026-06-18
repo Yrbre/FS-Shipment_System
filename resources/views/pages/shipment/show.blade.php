@@ -20,13 +20,14 @@
                     </a>
                     </div>
                     {{-- Tampilkan edit hanya jika status masih awal --}}
-                    @if (now() < $shipment->etd)
+                    @hasanyrole(['Admin', 'Purchasing'])
                     @can('shipment.edit')
                         <a href="{{ route('shipments.edit', $shipment->id) }}" class="btn btn-sm btn-primary">
                             <i class="fa-solid fa-pen-to-square me-1"></i> Update Shipment
                         </a>
                     @endcan
-                    @endif
+                    @endhasanyrole
+
                 </div>
             </div>
 
@@ -87,7 +88,12 @@
             <div class="row g-4">
 
                 {{-- Left Column --}}
-                <div class="col-lg-8">
+                @hasanyrole(['Admin', 'Purchasing', 'Buyer'])
+                    <div class="col-lg-8">
+                @endhasanyrole
+                @role('User')
+                <div class="col-lg-12">
+                @endrole
 
                     {{-- Shipment Information --}}
                     <div class="card shadow-sm mb-4">
@@ -189,6 +195,7 @@
                 </div>
 
                 {{-- Right Column: History Timeline --}}
+                @hasanyrole(['Admin','Purchasing','Buyer'])
                 <div class="col-lg-4">
                     <div class="card shadow-sm">
                         <div class="card-header d-flex align-items-center gap-2">
@@ -253,7 +260,7 @@
                         </div>
                     </div>
                 </div>
-
+                @endhasanyrole
             </div>
         </div>
     </div>

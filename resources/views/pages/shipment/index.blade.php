@@ -50,107 +50,150 @@
 @endsection
 
 @push('scripts')
-<script>
-    // Handle delete
-    $(document).on('click', '.js-delete', function(e) {
-        e.preventDefault();
-        var button = $(this);
-        var name   = button.data('name');
-        var role   = button.data('role');
-        var url    = button.data('url');
+    <script>
+        // Handle delete
+        $(document).on('click', '.js-delete', function(e) {
+            e.preventDefault();
+            var button = $(this);
+            var name = button.data('name');
+            var role = button.data('role');
+            var url = button.data('url');
 
-        Swal.fire({
-            title: 'Confirm Delete',
-            icon: 'warning',
-            theme: 'dark',
-            html: '<p>Are you sure you want to delete this shipment?</p>' +
-                  '<strong>PO :</strong> ' + name,
-            showCancelButton:   true,
-            confirmButtonText:  'Yes, Delete',
-            cancelButtonText:   'Cancel',
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor:  '#6c757d',
-            didClose: () => {
-                document.body.classList.remove('swal2-shown');
-                document.body.style.overflow    = '';
-                document.body.style.paddingRight = '';
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                var form = $('#deleteForm');
-                form.attr('action', url);
-                form.submit();
-            }
+            Swal.fire({
+                title: 'Confirm Delete',
+                icon: 'warning',
+                theme: 'dark',
+                html: '<p>Are you sure you want to delete this shipment?</p>' +
+                    '<strong>PO :</strong> ' + name,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                didClose: () => {
+                    document.body.classList.remove('swal2-shown');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var form = $('#deleteForm');
+                    form.attr('action', url);
+                    form.submit();
+                }
+            });
         });
-    });
-</script>
+    </script>
 
-<script>
-    $('#dataTable-1').DataTable({
-        autoWidth:   false,   // ← matikan autoWidth
-        processing:  true,
-        serverSide:  true,
-        responsive:  true,    // ← aktifkan responsive
-        ajax: '{{ route('shipments.index') }}',
-        columns: [
-            {
-                data: 'DT_RowIndex',
-                name: 'DT_RowIndex',
-                orderable:  false,
-                searchable: false,
-                width: '40px',
+    <script>
+        $('#dataTable-1').DataTable({
+            autoWidth: false, // ← matikan autoWidth
+            processing: true,
+            serverSide: true,
+            responsive: true, // ← aktifkan responsive
+            ajax: {
+                url: '{{ route('shipments.index') }}',
+                data: function(d) {
+                    d.status = "{{ $statusFilter }}";
+                }
             },
-            { data: 'po',         name: 'po' },
-            { data: 'supplier',   name: 'supplier' },
-            { data: 'no_invoice', name: 'no_invoice' },
-            { data: 'no_bl',      name: 'no_bl' },
-            {
-                data: 'etd',
-                name: 'etd',
-                width: '90px',
+            columns: [{
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex',
+                    orderable: false,
+                    searchable: false,
+                    width: '40px',
+                },
+                {
+                    data: 'po',
+                    name: 'po'
+                },
+                {
+                    data: 'supplier',
+                    name: 'supplier'
+                },
+                {
+                    data: 'no_invoice',
+                    name: 'no_invoice'
+                },
+                {
+                    data: 'no_bl',
+                    name: 'no_bl'
+                },
+                {
+                    data: 'etd',
+                    name: 'etd',
+                    width: '90px',
+                },
+                {
+                    data: 'eta',
+                    name: 'eta',
+                    width: '90px',
+                },
+                {
+                    data: 'status',
+                    name: 'status',
+                    width: '90px',
+                },
+                {
+                    data: 'updated_at',
+                    name: 'updated_at',
+                    width: '130px',
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    width: '120px',
+                },
+            ],
+            lengthMenu: [
+                [16, 32, 64, -1],
+                [16, 32, 64, 'All']
+            ],
+            language: {
+                processing: '<i class="fe fe-loader fe-spin"></i> Loading...',
             },
-            {
-                data: 'eta',
-                name: 'eta',
-                width: '90px',
-            },
-            {
-                data: 'status',
-                name: 'status',
-                width: '90px',
-            },
-            {
-                data: 'updated_at',
-                name: 'updated_at',
-                width: '130px',
-            },
-            {
-                data:       'action',
-                name:       'action',
-                orderable:  false,
-                searchable: false,
-                width:      '120px',
-            },
-        ],
-        lengthMenu: [
-            [16, 32, 64, -1],
-            [16, 32, 64, 'All']
-        ],
-        language: {
-            processing: '<i class="fe fe-loader fe-spin"></i> Loading...',
-        },
-        columnDefs: [
-            // Kolom yang bisa disembunyikan di mobile
-            { responsivePriority: 1, targets: 1 },  // PO — selalu tampil
-            { responsivePriority: 2, targets: 9 },  // Action — selalu tampil
-            { responsivePriority: 3, targets: 7 },  // Status
-            { responsivePriority: 4, targets: 2 },  // Supplier
-            { responsivePriority: 5, targets: 6 },  // ETA
-            { responsivePriority: 6, targets: 5 },  // ETD
-            { responsivePriority: 7, targets: 3 },  // No Invoice
-            { responsivePriority: 8, targets: 4 },  // No B/L
-            { responsivePriority: 9, targets: 8 },  // Updated At — hide duluan di mobile
-        ],
-    });
-</script>
+            columnDefs: [
+                // Kolom yang bisa disembunyikan di mobile
+                {
+                    responsivePriority: 1,
+                    targets: 1
+                }, // PO — selalu tampil
+                {
+                    responsivePriority: 2,
+                    targets: 9
+                }, // Action — selalu tampil
+                {
+                    responsivePriority: 3,
+                    targets: 7
+                }, // Status
+                {
+                    responsivePriority: 4,
+                    targets: 2
+                }, // Supplier
+                {
+                    responsivePriority: 5,
+                    targets: 6
+                }, // ETA
+                {
+                    responsivePriority: 6,
+                    targets: 5
+                }, // ETD
+                {
+                    responsivePriority: 7,
+                    targets: 3
+                }, // No Invoice
+                {
+                    responsivePriority: 8,
+                    targets: 4
+                }, // No B/L
+                {
+                    responsivePriority: 9,
+                    targets: 8
+                }, // Updated At — hide duluan di mobile
+            ],
+        });
+    </script>
 @endpush

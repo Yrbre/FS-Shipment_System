@@ -14,17 +14,17 @@
             <div class="d-flex">
                 <div class="mr-2">
                     <a href="{{ route('shipments.show', $shipment->id) }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-arrow-left mr-1"></i> Kembali
-                </a>
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali
+                    </a>
 
                 </div>
-                @if(now() < $shipment->etd)
+                @hasanyrole(['Admin', 'Purchasing'])
                     @can('shipment.edit')
                         <a href="{{ route('shipments.edit', $shipment->id) }}" class="btn btn-primary btn-sm">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </a>
                     @endcan
-                    @endif
+                @endhasanyrole
             </div>
         </div>
 
@@ -32,11 +32,11 @@
         @php
             $statusName = $shipment->status->name ?? '';
             $statusClass = match ($statusName) {
-                'Pending'    => 'warning',
-                'Completed'  => 'success',
-                'Rejected'   => 'danger',
-                'On The Way' => 'info',
-                default      => 'secondary',
+                'Pending' => 'warning',
+                'Delivered' => 'primary',
+                'Rejected' => 'danger',
+                'Process' => 'info',
+                default => 'secondary',
             };
         @endphp
         <div class="mb-3">
@@ -179,21 +179,21 @@
                     <div class="timeline-wrapper">
                         @foreach ($shipment->histories->sortByDesc('created_at') as $history)
                             @php
-                                $diff              = $historyDiffs[$history->id];
-                                $prev              = $diff['prev'];
-                                $changedFields     = $diff['changedFields'];
-                                $addedItemIds      = $diff['addedItemIds'];
-                                $removedItemIds    = $diff['removedItemIds'];
+                                $diff = $historyDiffs[$history->id];
+                                $prev = $diff['prev'];
+                                $changedFields = $diff['changedFields'];
+                                $addedItemIds = $diff['addedItemIds'];
+                                $removedItemIds = $diff['removedItemIds'];
                                 $changedItemFields = $diff['changedItemFields'];
-                                $prevItems         = $diff['prevItems'];
+                                $prevItems = $diff['prevItems'];
 
                                 $hStatusName = $history->status->name ?? '-';
                                 $hStatusClass = match ($hStatusName) {
-                                    'Pending'    => 'warning',
-                                    'Completed'  => 'success',
-                                    'Rejected'   => 'danger',
-                                    'On The Way' => 'info',
-                                    default      => 'secondary',
+                                    'Pending' => 'warning',
+                                    'Delivered' => 'primary',
+                                    'Rejected' => 'danger',
+                                    'Process' => 'info',
+                                    default => 'secondary',
                                 };
                             @endphp
 
@@ -202,15 +202,15 @@
                                     <div class="card-header bg-white py-2 px-3 d-flex align-items-center justify-content-between"
                                         data-toggle="collapse" data-target="#hist-{{ $history->id }}"
                                         style="cursor: pointer;">
-                                        <div class="d-flex align-items-center gap-3">
+                                        <div class="d-flex flex-column gap-1">
                                             <span class="badge badge-{{ $hStatusClass }}">{{ $hStatusName }}</span>
-                                            <small class="text-muted ml-2">
-                                                <i class="fas fa-user-circle mr-1"></i>
-                                                {{ $history->createdBy->name ?? '-' }}
+                                            <small class="text-muted">
+                                                <i class="fas fa-user-circle mt-2"></i>
+                                                {{ $history->creator->name ?? '-' }}
                                             </small>
                                             @if ($history->notes)
-                                                <small class="text-muted ml-2">
-                                                    <i class="fas fa-comment-alt mr-1"></i>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-comment-alt mt-2"></i>
                                                     {{ $history->notes }}
                                                 </small>
                                             @endif
@@ -236,8 +236,9 @@
                                                             <tr>
                                                                 <td class="text-muted pl-0" style="width:40%">No. PO</td>
                                                                 <td>
-                                                                    @if(in_array('po', $changedFields))
-                                                                        <span class="badge badge-warning">{{ $history->po ?? '-' }}</span>
+                                                                    @if (in_array('po', $changedFields))
+                                                                        <span
+                                                                            class="badge badge-warning">{{ $history->po ?? '-' }}</span>
                                                                     @else
                                                                         {{ $history->po ?? '-' }}
                                                                     @endif
@@ -246,8 +247,9 @@
                                                             <tr>
                                                                 <td class="text-muted pl-0">No. Invoice</td>
                                                                 <td>
-                                                                    @if(in_array('no_invoice', $changedFields))
-                                                                        <span class="badge badge-warning">{{ $history->no_invoice ?? '-' }}</span>
+                                                                    @if (in_array('no_invoice', $changedFields))
+                                                                        <span
+                                                                            class="badge badge-warning">{{ $history->no_invoice ?? '-' }}</span>
                                                                     @else
                                                                         {{ $history->no_invoice ?? '-' }}
                                                                     @endif
@@ -256,8 +258,9 @@
                                                             <tr>
                                                                 <td class="text-muted pl-0">No. BL</td>
                                                                 <td>
-                                                                    @if(in_array('no_bl', $changedFields))
-                                                                        <span class="badge badge-warning">{{ $history->no_bl ?? '-' }}</span>
+                                                                    @if (in_array('no_bl', $changedFields))
+                                                                        <span
+                                                                            class="badge badge-warning">{{ $history->no_bl ?? '-' }}</span>
                                                                     @else
                                                                         {{ $history->no_bl ?? '-' }}
                                                                     @endif
@@ -266,8 +269,9 @@
                                                             <tr>
                                                                 <td class="text-muted pl-0">Status</td>
                                                                 <td>
-                                                                    @if(in_array('status_id', $changedFields))
-                                                                        <span class="badge badge-warning">{{ $hStatusName }}</span>
+                                                                    @if (in_array('status_id', $changedFields))
+                                                                        <span
+                                                                            class="badge badge-warning">{{ $hStatusName }}</span>
                                                                     @else
                                                                         {{ $hStatusName }}
                                                                     @endif
@@ -284,10 +288,12 @@
                                                     <table class="table table-sm table-borderless mb-0">
                                                         <tbody>
                                                             <tr>
-                                                                <td class="text-muted pl-0" style="width:40%">Supplier</td>
+                                                                <td class="text-muted pl-0" style="width:40%">Supplier
+                                                                </td>
                                                                 <td>
-                                                                    @if(in_array('supplier_id', $changedFields))
-                                                                        <span class="badge badge-warning">{{ $history->supplier->name ?? '-' }}</span>
+                                                                    @if (in_array('supplier_id', $changedFields))
+                                                                        <span
+                                                                            class="badge badge-warning">{{ $history->supplier->name ?? '-' }}</span>
                                                                     @else
                                                                         {{ $history->supplier->name ?? '-' }}
                                                                     @endif
@@ -296,7 +302,7 @@
                                                             <tr>
                                                                 <td class="text-muted pl-0">ETD</td>
                                                                 <td>
-                                                                    @if(in_array('etd', $changedFields))
+                                                                    @if (in_array('etd', $changedFields))
                                                                         <span class="badge badge-warning">
                                                                             {{ $history->etd ? \Carbon\Carbon::parse($history->etd)->format('d M Y') : '-' }}
                                                                         </span>
@@ -308,7 +314,7 @@
                                                             <tr>
                                                                 <td class="text-muted pl-0">ETA</td>
                                                                 <td>
-                                                                    @if(in_array('eta', $changedFields))
+                                                                    @if (in_array('eta', $changedFields))
                                                                         <span class="badge badge-warning">
                                                                             {{ $history->eta ? \Carbon\Carbon::parse($history->eta)->format('d M Y') : '-' }}
                                                                         </span>
@@ -346,45 +352,51 @@
                                                         <tbody>
                                                             @foreach ($history->items as $hi => $hItem)
                                                                 @php
-                                                                    $isNew  = in_array($hItem->item_id, $addedItemIds);
+                                                                    $isNew = in_array($hItem->item_id, $addedItemIds);
                                                                     $itemCh = $changedItemFields[$hItem->item_id] ?? [];
                                                                 @endphp
                                                                 <tr class="{{ $isNew ? 'row-added' : '' }}">
                                                                     <td>{{ $hi + 1 }}</td>
                                                                     <td>
-                                                                        @if(in_array('item_id', $itemCh))
-                                                                            <span class="badge badge-warning">{{ $hItem->item->name ?? '-' }}</span>
+                                                                        @if (in_array('item_id', $itemCh))
+                                                                            <span
+                                                                                class="badge badge-warning">{{ $hItem->item->name ?? '-' }}</span>
                                                                         @else
                                                                             {{ $hItem->item->name ?? '-' }}
                                                                         @endif
-                                                                        @if($isNew)
-                                                                            <span class="badge badge-success ml-1" style="font-size:0.65rem;">Baru</span>
+                                                                        @if ($isNew)
+                                                                            <span class="badge badge-success ml-1"
+                                                                                style="font-size:0.65rem;">Baru</span>
                                                                         @endif
                                                                     </td>
                                                                     <td>
-                                                                        @if(in_array('hscode', $itemCh))
-                                                                            <span class="badge badge-warning">{{ $hItem->hscode ?? '-' }}</span>
+                                                                        @if (in_array('hscode', $itemCh))
+                                                                            <span
+                                                                                class="badge badge-warning">{{ $hItem->hscode ?? '-' }}</span>
                                                                         @else
                                                                             {{ $hItem->hscode ?? '-' }}
                                                                         @endif
                                                                     </td>
                                                                     <td>
-                                                                        @if(in_array('quantity', $itemCh))
-                                                                            <span class="badge badge-warning">{{ $hItem->quantity ?? '-' }}</span>
+                                                                        @if (in_array('quantity', $itemCh))
+                                                                            <span
+                                                                                class="badge badge-warning">{{ $hItem->quantity ?? '-' }}</span>
                                                                         @else
                                                                             {{ $hItem->quantity ?? '-' }}
                                                                         @endif
                                                                     </td>
                                                                     <td>
-                                                                        @if(in_array('uom', $itemCh))
-                                                                            <span class="badge badge-warning">{{ $hItem->uom ?? '-' }}</span>
+                                                                        @if (in_array('uom', $itemCh))
+                                                                            <span
+                                                                                class="badge badge-warning">{{ $hItem->uom ?? '-' }}</span>
                                                                         @else
                                                                             {{ $hItem->uom ?? '-' }}
                                                                         @endif
                                                                     </td>
                                                                     <td>
-                                                                        @if(in_array('notes', $itemCh))
-                                                                            <span class="badge badge-warning">{{ $hItem->notes ?? '-' }}</span>
+                                                                        @if (in_array('notes', $itemCh))
+                                                                            <span
+                                                                                class="badge badge-warning">{{ $hItem->notes ?? '-' }}</span>
                                                                         @else
                                                                             {{ $hItem->notes ?? '-' }}
                                                                         @endif
@@ -400,7 +412,8 @@
                                                                         <td>-</td>
                                                                         <td>
                                                                             {{ $removedItem->item->name ?? '-' }}
-                                                                            <span class="badge badge-danger ml-1" style="font-size:0.65rem;">Dihapus</span>
+                                                                            <span class="badge badge-danger ml-1"
+                                                                                style="font-size:0.65rem;">Dihapus</span>
                                                                         </td>
                                                                         <td>{{ $removedItem->hscode ?? '-' }}</td>
                                                                         <td>{{ $removedItem->quantity ?? '-' }}</td>
@@ -432,15 +445,19 @@
         .border-left-warning {
             border-left: 4px solid #ffc107 !important;
         }
+
         .border-left-success {
             border-left: 4px solid #28a745 !important;
         }
+
         .border-left-danger {
             border-left: 4px solid #dc3545 !important;
         }
+
         .border-left-info {
             border-left: 4px solid #17a2b8 !important;
         }
+
         .border-left-secondary {
             border-left: 4px solid #6c757d !important;
         }
@@ -459,12 +476,19 @@
             color: #6c757d;
             font-size: 0.875rem;
         }
+
         .nav-tabs .nav-link.active {
             font-weight: 600;
             color: #343a40;
         }
-        .gap-2 { gap: 0.5rem; }
-        .gap-3 { gap: 0.75rem; }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 0.75rem;
+        }
 
         .timeline-item .card-header:hover {
             background-color: #f8f9fa !important;
