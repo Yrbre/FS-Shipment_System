@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class HscodeDataService
 {
     private string $baseUrl;
+    private const CACHE_KEY = 'hscode_data';
 
     public function __construct()
     {
@@ -16,13 +18,15 @@ class HscodeDataService
     // Ambil semua data
     public function getAll(): array
     {
-        $response = Http::get("{$this->baseUrl}/data");
+        return Cache::remember(self::CACHE_KEY, now()->addHours(1), function () {
+            $response = Http::get("{$this->baseUrl}/data");
 
-        if ($response->failed()) {
-            return [];
-        }
+            if ($response->failed()) {
+                return [];
+            }
 
-        return $response->json('data') ?? [];
+            return $response->json('data') ?? [];
+        });
     }
 
     // Ambil satu data by rf

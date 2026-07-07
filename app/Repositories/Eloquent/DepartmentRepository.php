@@ -16,7 +16,7 @@ class DepartmentRepository extends BaseRepository implements DepartmentRepositor
 
     public function getAll()
     {
-        return $this->model->all();
+        return $this->model->orderBy('name')->get();
     }
 
     public function getById(int $id)

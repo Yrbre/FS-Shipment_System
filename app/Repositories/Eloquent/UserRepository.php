@@ -46,6 +46,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     public function getAllRoles()
     {
-        return Role::all();
+        return Role::orderBy('name')->get();
     }
 }
