@@ -40,7 +40,7 @@
                 </div>
 
                 {{-- ── KPI CARDS ── --}}
-                @hasanyrole('Admin|Purchasing|Buyer')
+                @hasanyrole('Admin|Import|Buyer')
                     <div class="row my-4">
 
                         <div class="col-md-3 col-sm-6">

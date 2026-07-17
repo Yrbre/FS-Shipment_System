@@ -15,7 +15,7 @@ class DashboardController extends Controller
         $base = Shipment::whereYear('created_at', $year)
                         ->whereMonth('created_at', $month);
 
-        if (!auth()->user()->hasAnyRole(['Admin','Purchasing','Buyer'])) {
+        if (!auth()->user()->hasAnyRole(['Admin','Import','Buyer'])) {
             $base->where('department_id', auth()->user()->department_id);
         }
 

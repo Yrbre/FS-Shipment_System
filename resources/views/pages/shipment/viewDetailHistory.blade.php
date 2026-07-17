@@ -18,7 +18,7 @@
                     </a>
 
                 </div>
-                @hasanyrole(['Admin', 'Purchasing'])
+                @hasanyrole(['Admin', 'Import'])
                     @can('shipment.edit')
                         <a href="{{ route('shipments.edit', $shipment->id) }}" class="btn btn-primary btn-sm">
                             <i class="fas fa-edit mr-1"></i> Edit

@@ -45,7 +45,7 @@ class ShipmentController extends Controller
         try {
             if ($request->ajax()) {
                 $user = auth()->user();
-                if ($user->hasAnyRole(['Admin', 'Purchasing', 'IMC', 'Buyer'])) {
+                if ($user->hasAnyRole(['Admin', 'Import', 'IMC', 'Buyer'])) {
                     $shipments = $this->shipmentService->getAll();
                 } else {
                     $shipments = $this->shipmentService->getByDepartment($user->department_id);
@@ -85,7 +85,7 @@ class ShipmentController extends Controller
 
                         if (auth()->user()->can('shipment.edit') && now() < $row->etd) {
                             $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
-                        } elseif (auth()->user()->hasAnyRole(['Admin', 'Purchasing'])) {
+                        } elseif (auth()->user()->hasAnyRole(['Admin', 'Import'])) {
                             $buttons .= ' <a href="' . route('shipments.edit', $row->id) . '" class="btn btn-sm btn-primary ms-1">Edit</a>';
                         }
 
