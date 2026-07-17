@@ -100,7 +100,7 @@
                                 {{-- Department Select2 --}}
                                 <div class="col-md-6 mt-2">
                                     <label for="department_id" class="form-label text-white">
-                                        Department <span class="text-danger">*</span>
+                                        Department Request<span class="text-danger">*</span>
                                     </label>
                                     <select
                                         class="form-control select2-department @error('department_id') is-invalid @enderror"
@@ -811,7 +811,7 @@
                     <div style="flex:1 1 50%; min-width:200px;">
                         <table class="swal-info-table">
                             <tr><td class="lbl">Supplier</td><td class="val">${supplierText}</td></tr>
-                            <tr><td class="lbl">Department</td><td class="val">${deptText}</td></tr>
+                            <tr><td class="lbl">Department Request</td><td class="val">${deptText}</td></tr>
                             <tr><td class="lbl">ETD</td><td class="val">${etd}</td></tr>
                             <tr><td class="lbl">ETA</td><td class="val">${eta}</td></tr>
                         </table>
