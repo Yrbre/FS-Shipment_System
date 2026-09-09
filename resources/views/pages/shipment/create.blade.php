@@ -213,9 +213,9 @@
                                                                     [{{ $oldRf }}] {{ $oldItemName }}
                                                                 </option>
                                                             @endif
-                                                            <option value="other" {{ $isOther ? 'selected' : '' }}>
+                                                            {{-- <option value="other" {{ $isOther ? 'selected' : '' }}>
                                                                 ➕ Other (New Item)
-                                                            </option>
+                                                            </option> --}}
                                                         </select>
                                                         <input type="hidden" name="rf[]"
                                                             value="{{ $oldRf }}">
@@ -280,7 +280,7 @@
                                                 <td>
                                                     <select class="form-control form-control-sm select2-item"
                                                         name="rf_select[]">
-                                                        <option value="other">➕ Other (New Item)</option>
+                                                        {{-- <option value="other">➕ Other (New Item)</option> --}}
                                                     </select>
                                                     <input type="hidden" name="rf[]" value="">
                                                     <input type="hidden" name="item_name[]" value="">
@@ -511,13 +511,13 @@
                                     hscode: d.hscode,
                                 };
                             });
-                            results.push({
-                                id: 'other',
-                                text: '➕ Other (New Item)',
-                                rf: '',
-                                item_name: '',
-                                hscode: ''
-                            });
+                            // results.push({
+                            //     id: 'other',
+                            //     text: '➕ Other (New Item)',
+                            //     rf: '',
+                            //     item_name: '',
+                            //     hscode: ''
+                            // });
                             return {
                                 results: results
                             };
